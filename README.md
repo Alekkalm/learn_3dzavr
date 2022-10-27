@@ -79,8 +79,43 @@
 `cmake --help`<br>
 
 
+#### дополнение по возможным IDE
+здесь рассказывается как настроить CodeBlocks для работы с библиотекой SFML:<br>
+https://www.sfml-dev.org/tutorials/2.5/start-cb.php
+
+Оказывается для CodeBlocks нужна своя версия SFML, для VisualStudio - своя версия SFML, для MinGW - своя версия:<br>
+https://www.sfml-dev.org/download/sfml/2.5.1/
+
+поэтому пока CodeBlocks и VisualStudio как IDE не рассматриваем.
+
+#### CodeLite в качестве IDE (редактор кода и дебагер)
+Пока работает следующим образом:<br>
+В графическом интерфейсе CMake когда нажимаю Configure - выбираю "CodeLite MinGW Makefiles" <br>
+ - появляются переменные которые нужно проверить и поменять если надо (выделеные красным). В переменной CMAKE_BUILD_TYPE пишу "Debug", и опять нажимаю Configure. Затем Generate.
+В папке buid появляется файл learn_3dzavr.workspace и learn_3dzavr.project - файлы для программы Codelite.
+ 
+В командной строке, как указано выше, из папки build запускаю 
+`cmake --build .`<br>
+В папке learn_3dzavr появляется learn_3dzavr.exe <br>
+
+Файлы learn_3dzavr.workspace и learn_3dzavr.project - нам нужны чтобы открыть наши файлы как проект в рабочем пространстве.<br>
+Файл learn_3dzavr.exe нам нужен чтобы можно было дебажить.
+
+Запускаем CodeLite, открываем WorkSpace (указываем наш файл learn_3dzavr.workspace).<br>
+
+в меню Debugger -> QuickDebug.. <br>
+в поле  Debuggee: Exequtable указываем на наш файл learn_3dzavr.exe. <br>
 
 
+Здесь пишут как настроить SFML для CodeLite <br>
+https://en.sfml-dev.org/forums/index.php?topic=18820.0 <br>
+и здесь тоже:
+https://stackoverflow.com/questions/64629891/how-to-configure-codelite-ide-to-use-c-and-sfml-library-windows-linux-confi <br>
+
+оказалось что мне было достаточно на молоток (Build Active Project) и ошибки про то что он невидит SFML библиотеку пропали. (То есть не пришлось настраивать все как написано по ссылке).
+
+вот здесь пишут какие IDE имеют интеграцию с CMake нативно: <br>
+file:///C:/Program%20Files/CMake/doc/cmake/html/guide/ide-integration/index.html <br>
 
 
 
