@@ -152,7 +152,7 @@ https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/README.md <br>
 https://code.visualstudio.com/docs/cpp/config-wsl <br>
 
 #### Как запустился проект в VSCode
-После того как я в параметрах Cmake tool плагина в переменную "CMake:Generator" ввел текст `MinGW Makefiles` <br>
+После того как я в параметрах плагина "Cmake tool" в переменную "CMake:Generator" ввел текст `MinGW Makefiles` <br>
 затем закрыл vscode.<br>
 В командной строке перешел в папку нашего проекта learn_3dzavr,<br>
 и в командной строке ввел `code .` <br>
