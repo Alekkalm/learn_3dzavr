@@ -128,7 +128,7 @@ file:///C:/Program%20Files/CMake/doc/cmake/html/guide/ide-integration/index.html
 здесь описание для Linux, но оно подходит и для Windows <br>
 https://code.visualstudio.com/docs/cpp/CMake-linux <br>
 У меня ругался что не может найти генератор.<br>
-Поэтому я в параметрах Cmake tool плагина в переменную CMake:Generator ввел текс "MinGW Makefiles"<br>
+Поэтому я в параметрах плагина "Cmake tool" в переменную CMake:Generator ввел текс "MinGW Makefiles"<br>
 И потом нажал кнопку Build внизу в статусной строке.<br>
 И увидел что Cmake смог собрать проект.<br>
 
@@ -152,7 +152,7 @@ https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/README.md <br>
 https://code.visualstudio.com/docs/cpp/config-wsl <br>
 
 #### Как запустился проект в VSCode
-После того как я в параметрах Cmake tool плагина в переменную CMake:Generator ввел текс "MinGW Makefiles"<br>
+После того как я в параметрах Cmake tool плагина в переменную "CMake:Generator" ввел текст `MinGW Makefiles` <br>
 затем закрыл vscode.<br>
 В командной строке перешел в папку нашего проекта learn_3dzavr,<br>
 и в командной строке ввел `code .` <br>
