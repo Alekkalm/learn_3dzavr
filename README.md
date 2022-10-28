@@ -117,5 +117,48 @@ https://stackoverflow.com/questions/64629891/how-to-configure-codelite-ide-to-us
 вот здесь пишут какие IDE имеют интеграцию с CMake нативно: <br>
 file:///C:/Program%20Files/CMake/doc/cmake/html/guide/ide-integration/index.html <br>
 
+#### IDE KDevelop
+Опенсорсная бесплатная IDE с интегрированным CMake.<br>
+В настройках можно выбрать: "Настройки" -> "Настроить KDevelop.." -> CMake -> DefaultGenerator: -> MinGWMakefiles.<br>
+Затем открыть проект: "Проект" -> "Открыть/импортировать проект.." -> выбрать нашу папку.<br>
+Слева сбоку вкладка "Файловая система" - это проводник. Я не сразу распознал. Только через час наверно. Присмотритесь. ) <br>
+Отладку пока не запустил, ругается что не может найти LLDB дебагер. <br>
+
+#### VSCode
+здесь описание для Linux, но оно подходит и для Windows <br>
+https://code.visualstudio.com/docs/cpp/CMake-linux <br>
+У меня ругался что не может найти генератор.<br>
+Поэтому я в параметрах Cmake tool плагина в переменную CMake:Generator ввел текс "MinGW Makefiles"<br>
+И потом нажал кнопку Build внизу в статусной строке.<br>
+И увидел что Cmake смог собрать проект.<br>
+
+Быстрый старт:<br>
+Создать папку.<br>
+перейти в нее из командной строки.<br>
+в командной строке написать `code .`<br>
+(запустится vscode и будет считать текущую папку WorkSpace-ом.)<br>
+
+создание проекта HelloWorld<br>
+открыть Command Palette (нажать Ctrl+Shift+P), вписать команду "CMake: Quick Start"<br>
+vscode предложит выбрать kit (kit - в данном случает это набор инструментов (по английски это звучит как toolchain) в который входят compiler, linker, и др.)<br>
+я выбираю GCC...<br>
+затем - предложит ввести имя проекта.<br>
+затем - выбрать тип проекта Executable - для exe файла, или Library для dll. <br>
+Создастся CMakeLists.txt и main.cpp<br>
+
+документация по CMake tools для vscode:<br>
+https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/README.md <br>
+что то про дебагер vscode <br>
+https://code.visualstudio.com/docs/cpp/config-wsl <br>
+
+#### Как запустился проект в VSCode
+После того как я в параметрах Cmake tool плагина в переменную CMake:Generator ввел текс "MinGW Makefiles"<br>
+затем закрыл vscode.<br>
+В командной строке перешел в папку нашего проекта learn_3dzavr,<br>
+и в командной строке ввел `code .` <br>
+VSCode открыла наш проект, и когда я перешел в окно редактированя файла test_scene.cpp там были выделены ошибки про то что не может найти библиотеку SFML.<br>
+Я нажал Build внизу в статусной строке, и когда сборка проекта закончилась то ошибок больше небыло.<br>
+И когда нажал на божью коровку внизу в статусной строке, то запустился дебагер.<br>
+То есть все работает.<br>
 
 
