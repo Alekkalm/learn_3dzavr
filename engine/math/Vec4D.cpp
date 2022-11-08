@@ -22,57 +22,55 @@ Vec4D::Vec4D(const Vec4D &point4D) {
     _arr_point[2] = point4D.z();
     _arr_point[3] = point4D.w();
 }
-
+//инверсия
 [[nodiscard]] Vec4D Vec4D::operator-() const {
-    // TODO: implement (lesson 1)
-    return Vec4D();
+    return Vec4D(-x(), -y(), -z(), -w());// TODO: implemented (lesson 1)
 }
 
 bool Vec4D::operator==(const Vec4D &point4D) const {
-    // TODO: implement (lesson 1)
-    return true;
+    Vec4D diff = *this - point4D;
+    return diff.sqrAbs() < Consts::EPS;// TODO: implemented (lesson 1)
 }
 
 bool Vec4D::operator!=(const Vec4D &point4D) const {
-    // TODO: implement (lesson 1)
-    return true;
+    return !(*this == point4D);// TODO: implemented (lesson 1)
 }
 
 // Operations with Vec4D
 Vec4D Vec4D::operator+(const Vec4D &point4D) const {
-    // TODO: implement (lesson 1)
-    return Vec4D();
+    return Vec4D(x()+point4D.x(), y()+point4D.y(), z()+point4D.z(), w()+point4D.w());// TODO: implemented (lesson 1)
 }
 
 Vec4D Vec4D::operator-(const Vec4D &point4D) const {
-    // TODO: implement (lesson 1)
-    return Vec4D();
+    return Vec4D(x()-point4D.x(), y()-point4D.y(), z()-point4D.z(), w()-point4D.w());// TODO: implemented (lesson 1)
 }
 
 Vec4D Vec4D::operator*(double number) const {
-    // TODO: implement (lesson 1)
-    return Vec4D();
+    return Vec4D(x()*number, y()*number, z()*number, w()*number);// TODO: implemented (lesson 1)
 }
 
 Vec4D Vec4D::operator/(double number) const {
-    // TODO: implement (lesson 1)
-    return Vec4D();
+    if(number > Consts::EPS)
+        return Vec4D(x()/number, y()/number, z()/number, w()/number);// TODO: implemented (lesson 1)
+    else
+        throw std::domain_error{"Vec4D/operator/(double number): division by zero"};
 }
 
 // Other useful methods
 double Vec4D::sqrAbs() const {
-    // TODO: implement (lesson 1)
-    return 1;
+    return x()*x() + y()*y() + z()*z() + w()*w();// TODO: implemented (lesson 1)
 }
 
 double Vec4D::abs() const {
-    // TODO: implement (lesson 1)
-    return 1;
+    return std::sqrt(sqrAbs());// TODO: implemented (lesson 1)
 }
 
 Vec4D Vec4D::normalized() const {
-    // TODO: implement (lesson 1)
-    return Vec4D();
+    double vecAbs = abs();
+    if(vecAbs>Consts::EPS)
+        return Vec4D(*this/vecAbs);// TODO: implemented (lesson 1)
+    else
+        return Vec4D(0);
 }
 
 bool Vec4D::isNear(double a, double b) {

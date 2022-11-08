@@ -22,61 +22,58 @@ Vec2D::Vec2D(const Vec4D &point4D) {
     _arr_point[0] = point4D.x();
     _arr_point[1] = point4D.y();
 }
-
+//инверсия
 Vec2D Vec2D::operator-() const {
-    // TODO: implement (lesson 1)
-    return Vec2D();
+    return Vec2D(-x(), -y()); // TODO: implemented (lesson 1)
 }
 
 bool Vec2D::operator==(const Vec2D &vec) const {
-    // TODO: implement (lesson 1)
-    return true;
+    Vec2D diff = *this - vec;
+    return diff.sqrAbs() < Consts::EPS; // TODO: implemented (lesson 1)
 }
 
 bool Vec2D::operator!=(const Vec2D &vec) const {
-    // TODO: implement (lesson 1)
-    return true;
+    return !(*this==vec);// TODO: implemented (lesson 1)
 }
 
 Vec2D Vec2D::operator+(const Vec2D &vec) const {
-    // TODO: implement (lesson 1)
-    return Vec2D();
+    return Vec2D(x()+vec.x(), y()+vec.y());// TODO: implemented (lesson 1)
 }
 
 Vec2D Vec2D::operator-(const Vec2D &vec) const {
-    // TODO: implement (lesson 1)
-    return Vec2D();
+    return Vec2D(x()-vec.x(), y()-vec.y());// TODO: implemented (lesson 1)
 }
 
 Vec2D Vec2D::operator*(double number) const {
-    // TODO: implement (lesson 1)
-    return Vec2D();
+    return Vec2D(x()*number, y()*number);// TODO: implemented (lesson 1)
 }
 
 Vec2D Vec2D::operator/(double number) const {
-    // TODO: implement (lesson 1)
-    return Vec2D();
+    if(std::abs(number) > Consts::EPS)
+        return Vec2D(x()/number, y()/number);// TODO: implemented (lesson 1)
+    else
+        throw std::domain_error{"Vec2D::operator/(double number): devision by zero"};
 }
 
 // Other useful methods
 double Vec2D::sqrAbs() const {
-    // TODO: implement (lesson 1)
-    return 1;
+    return x()*x() + y()*y();// TODO: implemented (lesson 1)
 }
 
 double Vec2D::abs() const {
-    // TODO: implement (lesson 1)
-    return 1;
+    return std::sqrt(sqrAbs());// TODO: implement (lesson 1)
 }
 
 Vec2D Vec2D::normalized() const {
-    // TODO: implement (lesson 1)
-    return Vec2D();
+    double vecAbs = abs();// TODO: implemented (lesson 1)
+    if(vecAbs>Consts::EPS) 
+        return Vec2D(*this)/vecAbs;
+    else
+        return Vec2D(0);
 }
-
+//скалярное произведение
 double Vec2D::dot(const Vec2D &vec) const {
-    // TODO: implement (lesson 1)
-    return 0;
+    return x()*vec.x() + y()*vec.y();// TODO: implemented (lesson 1)
 }
 
 bool Vec2D::isNear(double a, double b) {

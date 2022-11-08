@@ -26,67 +26,65 @@ Vec3D::Vec3D(double x, double y, double z) {
     _arr_point[1] = y;
     _arr_point[2] = z;
 }
-
+//инверсия
 Vec3D Vec3D::operator-() const {
-    // TODO: implement (lesson 1)
-    return Vec3D();
+    return Vec3D(-x(),-y(),-z());// TODO: implemented (lesson 1)
 }
-
+//сравнение векторов
 bool Vec3D::operator==(const Vec3D &vec) const {
-    // TODO: implement (lesson 1)
-    return true;
+    Vec3D diff = *this-vec;
+    return diff.sqrAbs() < Consts::EPS;    // TODO: implemented (lesson 1)
 }
-
+//сравнение векторов
 bool Vec3D::operator!=(const Vec3D &vec) const {
-    // TODO: implement (lesson 1)
-    return true;
+    return !(*this==vec);// TODO: implemented (lesson 1)
 }
 
 // Operations with Vec3D
 Vec3D Vec3D::operator+(const Vec3D &vec) const {
-    // TODO: implement (lesson 1)
-    return Vec3D();
+    return Vec3D(x()+vec.x(), y()+vec.y(), z()+vec.z());// TODO: implemented (lesson 1)
 }
 
 Vec3D Vec3D::operator-(const Vec3D &vec) const {
-    // TODO: implement (lesson 1)
-    return Vec3D();
+    return Vec3D(x()-vec.x(), y()-vec.y(), z()-vec.z());// TODO: implemented (lesson 1)
 }
-
+//умножить вектор на число
 Vec3D Vec3D::operator*(double number) const {
-    // TODO: implement (lesson 1)
-    return Vec3D();
+    return Vec3D(x()*number, y()*number, z()*number);// TODO: implemented (lesson 1)
 }
-
+//разделить вектор на число
 Vec3D Vec3D::operator/(double number) const {
-    // TODO: implement (lesson 1)
-    return Vec3D();
+    if(std::abs(number)>Consts::EPS)
+        return Vec3D(x()/number, y()/number, z()/number);// TODO: implemented (lesson 1)
+    else
+        throw std::domain_error{"Vec3D::operator/(double number): division by zero"};
 }
 
 // Other useful methods
 double Vec3D::sqrAbs() const {
-    // TODO: implement (lesson 1)
-    return 1;
+    return x()*x() + y()*y() + z()*z();// TODO: implemented (lesson 1)
 }
 
 double Vec3D::abs() const {
-    // TODO: implement (lesson 1)
-    return 1;
+    return std::sqrt(sqrAbs());// TODO: implemented (lesson 1)
 }
 
 Vec3D Vec3D::normalized() const {
-    // TODO: implement (lesson 1)
-    return Vec3D();
+    double vecAbs = abs();
+    if(vecAbs>Consts::EPS)
+        return Vec3D(*this/vecAbs);
+    else
+        return Vec3D(0);// TODO: implemented (lesson 1)
 }
-
+//скалярное произведение
 double Vec3D::dot(const Vec3D &vec) const {
-    // TODO: implement (lesson 1)
-    return 0;
+    return x()*vec.x() + y()*vec.y() + z()*vec.z();// TODO: implemented (lesson 1)
 }
-
+//векторное произведение
 Vec3D Vec3D::cross(const Vec3D &vec) const {
-    // TODO: implement (lesson 1)
-    return Vec3D();
+    return Vec3D(y()*vec.z()-z()*vec.y(), 
+                 z()*vec.x()-x()*vec.z(),
+                 x()*vec.y()-y()*vec.x());// TODO: implemented (lesson 1)
 }
 
 Vec4D Vec3D::makePoint4D() const {
