@@ -43,7 +43,7 @@ void Object::transformRelativePoint(const Vec3D &point, const Matrix4x4 &transfo
 
 void Object::translate(const Vec3D &dv) {
 
-    // TODO: implement (lesson 2)
+    _position = _position + dv;// TODO: implemented (lesson 2)
 
     for (auto &[attachedName, attachedObject] : _attachedObjects) {
         if (!attachedObject.expired()) {
@@ -51,41 +51,52 @@ void Object::translate(const Vec3D &dv) {
         }
     }
 }
-
+//масштабирование на вектор s
 void Object::scale(const Vec3D &s) {
-    // TODO: implement (lesson 2)
+    transform(Matrix4x4::Scale(s));// TODO: implemented (lesson 2)
 }
-
+//вращение на угол r
 void Object::rotate(const Vec3D &r) {
-    // TODO: implement (lesson 2)
+    _angle = _angle + r;// TODO: implemented (lesson 2)
+    transform(Matrix4x4::Rotation(r));
 }
-
+//вращение вокруг вектора v на угол rv
 void Object::rotate(const Vec3D &v, double rv) {
-    // TODO: implement (lesson 2)
+    transform(Matrix4x4::Rotation(v, rv));// TODO: implemented (lesson 2)
 }
-
+//вращение относительно точки s на угол r
 void Object::rotateRelativePoint(const Vec3D &s, const Vec3D &r) {
-    // TODO: implement (lesson 2)
+    _angle = _angle + r;// TODO: implemented (lesson 2)
+    transformRelativePoint(s, Matrix4x4::Rotation(r));
 }
-
+//вращение относительно заданной точки s вокруг вектора v на заданный угол r
 void Object::rotateRelativePoint(const Vec3D &s, const Vec3D &v, double r) {
-    // TODO: implement (lesson 2)
+    transformRelativePoint(s, Matrix4x4::Rotation(v, r));// TODO: implemented (lesson 2)
 }
-
+//вращение относительно оси направленной влево (оси x)
 void Object::rotateLeft(double rl) {
-    // TODO: implement (lesson 2)
+    _angleLeftUpLookAt = Vec3D(_angleLeftUpLookAt.x() + rl,// TODO: implemented (lesson 2)
+                                _angleLeftUpLookAt.y(),
+                                _angleLeftUpLookAt.z());
+    rotate(left(), rl);
 }
-
+//вращение относительно оси направленной вверх (оси y)
 void Object::rotateUp(double ru) {
-    // TODO: implement (lesson 2)
+    _angleLeftUpLookAt = Vec3D(_angleLeftUpLookAt.x(),// TODO: implemented (lesson 2)
+                                _angleLeftUpLookAt.y() + ru,
+                                _angleLeftUpLookAt.z());
+    rotate(up(), ru);
 }
-
+//вращение относительно оси направленной по направлению взгляда (оси z)
 void Object::rotateLookAt(double rlAt) {
-    // TODO: implement (lesson 2)
+    _angleLeftUpLookAt = Vec3D(_angleLeftUpLookAt.x(),// TODO: implemented (lesson 2)
+                                _angleLeftUpLookAt.y(),
+                                _angleLeftUpLookAt.z() + rlAt);
+    rotate(lookAt(), rlAt);
 }
-
+//смещение на вектор
 void Object::translateToPoint(const Vec3D &point) {
-    // TODO: implement (lesson 2)
+    translate(point - _position);// TODO: implemented (lesson 2)
 }
 
 void Object::attractToPoint(const Vec3D &point, double value) {
