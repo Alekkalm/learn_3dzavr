@@ -72,8 +72,13 @@ void Engine::create(int screenWidth, int screenHeight, const std::string &name, 
                 delete[] view;
             } else {
                 // clear triangles from previous frame
-                camera->clear();
+                //АК комент: удаляем спроецированные на экран треугольники из коллеции треугольников.
+                //т.е. очищаем коллекцию треугольников. теперь длина коллекции будет = 0.
+                camera->clear(); 
                 // project triangles to the camera plane
+                //АК комент: мир (world) - это словарь (map) объектов.
+                //т.е. индексом в словаре является текстовое имя завернутое в класс ObjectTagName (первый элемент кортежа)
+                //а данными в словаре являются RigidBody (второй элемент кортежа)
                 for (auto &it : *world) {
                     camera->project(it.second);
                 }
@@ -93,6 +98,19 @@ void Engine::create(int screenWidth, int screenHeight, const std::string &name, 
             }
             printDebugInfo();
             gui();
+            
+            //АК: тестовые треугольник и прямоугольник
+            //0, 0, 0 - это черный цвет. четвертый 0 - это непрозрачность. 0 = прозрачный.
+            //255, 255, 255 - это белый цвет. четвертая цифра - непрозрачность. 255 = непрозрачный.
+            //координаты - в пикселях, 0,0 - находится в верхнем левом углу.
+            //в файле Scree.cpp стр.110 можно включить отображение ребер.(даже если непрозрачность треугольников = 0 (прозрачный))
+
+            //screen->drawTriangle(Triangle(Vec4D(100,0,1,1),Vec4D(200,0,1,1),Vec4D(0,100,1,1),sf::Color(0, 0, 0, 150)));
+            //screen->drawTetragon(   Vec2D{5,5},
+            //                        Vec2D{Consts::STANDARD_SCREEN_WIDTH - 20, 5},
+            //                        Vec2D{Consts::STANDARD_SCREEN_WIDTH - 20, Consts::STANDARD_SCREEN_HEIGHT - 20},
+            //                        Vec2D{5, Consts::STANDARD_SCREEN_HEIGHT - 20},
+            //                        {222, 222, 0, 100});
         }
 
         screen->display();
