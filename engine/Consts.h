@@ -10,14 +10,14 @@
 #include "math/Vec2D.h"
 
 namespace Consts {
-    const int STANDARD_SCREEN_WIDTH = 1920;
-    const int STANDARD_SCREEN_HEIGHT = 1080;
-    const sf::Color BACKGROUND_COLOR = sf::Color(255, 255, 255);
+    const int STANDARD_SCREEN_WIDTH = 1920;//1280;//1920;
+    const int STANDARD_SCREEN_HEIGHT = 1080;//720;//1080;
+    const sf::Color BACKGROUND_COLOR = sf::Color(200, 200, 200);//АК: было 255,255,255
     const std::string PROJECT_NAME = "engine";
     const bool USE_LOG_FILE = true;
     const bool USE_OPEN_GL = false;
-    const bool SHOW_DEBUG_INFO = false;
-    const bool SHOW_FPS_COUNTER = false;
+    const bool SHOW_DEBUG_INFO = false;//true;//false;
+    const bool SHOW_FPS_COUNTER = false;//true;//false;
 
     const double PI = 3.14159265358979323846264338327950288;
     const double EPS = 0.000001;
