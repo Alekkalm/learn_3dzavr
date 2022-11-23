@@ -9,7 +9,10 @@ private:
     double rotationSpeed = 1;
 
     // load monkey to the scene
+    // здесь можно подгрузить другой объект
     std::shared_ptr<RigidBody> monkey = world->loadBody(ObjectNameTag("monkey"), "obj/monkey.obj");
+    //std::shared_ptr<RigidBody> monkey = world->loadBody(ObjectNameTag("monkey"), "obj/cube.obj");
+    //std::shared_ptr<RigidBody> monkey = world->loadBody(ObjectNameTag("monkey"), "obj/shotgun.obj");
 public:
     Lesson3() = default;
 
@@ -20,7 +23,17 @@ public:
 
     void update() override {
         // rotate monkey in every frame
+        //обезьянку можно вращать:
         monkey->rotate(Vec3D(0, rotationSpeed*Time::deltaTime(), 0));
+        //можно двигать (например влево и от нас):
+        //monkey->translate(Vec3D(rotationSpeed * Time::deltaTime(), 0, rotationSpeed * Time::deltaTime()));
+        //можно двигать (например влево и к нам):
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //тут программа падает. где то в районе когда какие то координаты где-то возможно станвятся отрицательными.
+        //надо дебажить. Но неохота. 
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //в видео говорится что этими (с другими но похожими) проблемами будет разбираться на следующем уроке...
+        //monkey->translate(Vec3D(rotationSpeed * Time::deltaTime(), 0, -rotationSpeed * Time::deltaTime()));
     }
 };
 
