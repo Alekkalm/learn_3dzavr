@@ -83,6 +83,9 @@ void Engine::create(int screenWidth, int screenHeight, const std::string &name, 
                     camera->project(it.second);
                 }
                 // draw triangles on the screen
+                //АК комент: все треугольники которые спроецированы на камеру мы отсортируем по Z координате средней точки.
+                //А потом в порядке от дальних к ближнему будем их отрисовывать на экране.
+                //это называется "алгоритм художника".
                 for (auto &t : camera->sorted()) {
                     screen->drawTriangle(t);
                 }
