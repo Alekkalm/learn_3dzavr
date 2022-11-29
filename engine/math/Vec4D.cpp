@@ -53,7 +53,8 @@ Vec4D Vec4D::operator/(double number) const {
     if(number > Consts::EPS)
         return Vec4D(x()/number, y()/number, z()/number, w()/number);// TODO: implemented (lesson 1)
     else
-        throw std::domain_error{"Vec4D/operator/(double number): division by zero"};
+        return Vec4D(x()/Consts::EPS, y()/Consts::EPS, z()/Consts::EPS, w()/Consts::EPS);
+        //throw std::domain_error{"Vec4D/operator/(double number): division by zero"};
 }
 
 // Other useful methods

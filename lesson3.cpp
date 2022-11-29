@@ -23,17 +23,21 @@ public:
 
     void update() override {
         // rotate monkey in every frame
+
         //обезьянку можно вращать:
-        monkey->rotate(Vec3D(0, rotationSpeed*Time::deltaTime(), 0));
+        //monkey->rotate(Vec3D(0, rotationSpeed*Time::deltaTime(), 0));
+
         //можно двигать (например влево и от нас):
         //monkey->translate(Vec3D(rotationSpeed * Time::deltaTime(), 0, rotationSpeed * Time::deltaTime()));
+
         //можно двигать (например влево и к нам):
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //тут программа падает. где то в районе когда какие то координаты где-то возможно станвятся отрицательными.
-        //надо дебажить. Но неохота. 
+        //тут программа падает. 
+        //выбрасывает исключение, которое мы сами происали в Vector4D.cpp в методе "operator/" - деление вектора на число,
+        //если число будет меньше Consts::EPS.
+        //Если поправить этот метод, (убрать исключение) то ничего не падает.
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //в видео говорится что этими (с другими но похожими) проблемами будет разбираться на следующем уроке...
-        //monkey->translate(Vec3D(rotationSpeed * Time::deltaTime(), 0, -rotationSpeed * Time::deltaTime()));
+        monkey->translate(Vec3D(rotationSpeed * Time::deltaTime(), 0, -rotationSpeed * Time::deltaTime()));
     }
 };
 
