@@ -32,6 +32,11 @@ public:
     //тогда у фотоппарата с кроп-матрицей и объективом с фокусным расстоянием 50мм будет угол обзора не 40 градусов,
     //а примерно 28 градусов. (50*1,5=75 т.е. как у полнокадрового с объетивом 75мм)
     //https://vk.com/@camerawars-kakov-realnyi-ugol-obzora-kamery-uglovoe-pole
+
+    //здесь fov - это угол обзора по высоте (сверху вниз). 
+    //fov - это полный угол обзора. Если нужна половина, то нужно делить на 2.
+    //видимо угол обзора по горизонтали можно найти так:
+    //arctg(2*b) = arctg(2* aspect / s) = arctg(2* aspect / (1/tg(a))) = arctg(2*aspect*tg(a))
     void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 100.0);
     //void init(int width, int height, double fov = 40.0, double ZNear = 0.1, double ZFar = 100.0);
     //void init(int width, int height, double fov = 28.0, double ZNear = 0.1, double ZFar = 100.0);
