@@ -50,6 +50,13 @@ public:
 
     virtual ~Engine() = default;
 
+    //АК комент: выключая вертикальную синхронизацию (verticalSync = false)- 
+    // - можно увеличить FPS (сделать FPS больше чем может монитор).
+    //У меня - в включенным OpenGL и включенной вертикальной синхронизацией - дает 59 FPS. 
+    //А с в включенным OpenGL и выключенной вертикальной синхронизацией - дает 250 FPS.
+    //Но если FPS меньше чем может монитор, то выключени вертикальной синхронизации не поднимет FPS.
+    //То есть нет смысла отключать вертикальную синхронизацию.
+    //Можно отключить - если хочется посмотреть какой запас по производительности (какой FPS может выдать компьютер).
     void create(int screenWidth = Consts::STANDARD_SCREEN_WIDTH, int screenHeight = Consts::STANDARD_SCREEN_HEIGHT,
                 const std::string &name = Consts::PROJECT_NAME, bool verticalSync = true,
                 sf::Color background = Consts::BACKGROUND_COLOR, sf::Uint32 style = sf::Style::Default);
