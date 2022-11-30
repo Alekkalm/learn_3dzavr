@@ -10,6 +10,11 @@ Triangle::Triangle(const Vec4D &p1, const Vec4D &p2, const Vec4D &p3, sf::Color 
     calculateNormal();
 }
 
+//АК комент:
+//здесь мы видим, что точка [0] - это точка из которого выходят два вектора
+//первый вектор идет из точки [0] в точку [1],
+//второй вектор идет из точки [0] в точку [2].
+//т.е. когда мы строим нормаль, то получаем что вектор нормали выходит из точки [0].
 void Triangle::calculateNormal() {
     Vec3D v1 = Vec3D(_points[1] - _points[0]);
     Vec3D v2 = Vec3D(_points[2] - _points[0]);
