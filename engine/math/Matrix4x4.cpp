@@ -195,10 +195,32 @@ Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
     return s;
 }
 
+//матрица перехода в систему координат камеры
+//в метод передаются: 
+//единичный вектор х камеры (назыается left),
+//единичный вектор Y камеры (называется up)
+//единичный вектор Z камеры (называется lookAt)
+//вектор смещения камеры (называется eye)
 Matrix4x4 Matrix4x4::View(const Vec3D &left, const Vec3D &up, const Vec3D &lookAt, const Vec3D &eye) {
     Matrix4x4 V = Zero();
 
-    // TODO: implement (lesson 4)
+    // TODO: implemented (lesson 4)
+    V._arr[0][0] = left.x();
+    V._arr[0][1] = left.y();
+    V._arr[0][2] = left.z();
+    V._arr[0][3] = -eye.dot(left);
+
+    V._arr[1][0] = up.x();
+    V._arr[1][1] = up.y();
+    V._arr[1][2] = up.z();
+    V._arr[1][3] = -eye.dot(up);
+
+    V._arr[2][0] = lookAt.x();
+    V._arr[2][1] = lookAt.y();
+    V._arr[2][2] = lookAt.z();
+    V._arr[2][3] = -eye.dot(lookAt);
+
+    V._arr[3][3] = 1.0;
 
     return V;
 }
