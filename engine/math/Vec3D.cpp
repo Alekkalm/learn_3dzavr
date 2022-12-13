@@ -82,9 +82,23 @@ double Vec3D::dot(const Vec3D &vec) const {
 }
 //векторное произведение
 Vec3D Vec3D::cross(const Vec3D &vec) const {
-    return Vec3D(y()*vec.z()-z()*vec.y(), 
+    //return Vec3D(y()*vec.z()-z()*vec.y(), 
+    //             z()*vec.x()-x()*vec.z(),
+    //             x()*vec.y()-y()*vec.x());// TODO: implemented (lesson 1)
+
+    Vec3D v =  Vec3D(y()*vec.z()-z()*vec.y(), 
                  z()*vec.x()-x()*vec.z(),
                  x()*vec.y()-y()*vec.x());// TODO: implemented (lesson 1)
+
+        //если не использовать OpenGL, то при векторном умножении появляются результаты = 0.
+        //отчего это - не выяснял. Но на всякий случай - записал.
+        //int nu = 0;
+        //if(v == Vec3D(0,0,0))
+        //{
+            //nu++; //векторное произведение = 0!!!! выходной вектор 0,0,0 - нет направления!!!!
+            //throw std::domain_error{"Vec3D::method cross(const Vec3D &vec): result is Vec3D(0,0,0)"};
+        //}  
+        return v;        
 }
 
 Vec4D Vec3D::makePoint4D() const {
