@@ -45,16 +45,27 @@ Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
     Vec3D maxPoint{0, 0, 0};
     double maxDistance = -std::numeric_limits<double>::max();
 
+    //чтобы не переводить каждую точку в мировую систему координат, 
+    //наоборот переведем вектор направления в систему координат нашего объекта:
+    Vec3D transformedDirection = (invModel()*direction).normalized();
+
     //_hitBox - это облако уникальных точек для модели. (т.к. в треугольнках точки повторяются(так в нашей программе сделано))
     //т.е. куб - это 6 граней. каждая грать - это 2 треугольника. каждый треугольник состоит из 3 точек. получаем 6*2*3=36точек.
     //но у куба - 8 уникальных точек.
     for(auto & it : _hitBox) {
         // TODO: implemented (lesson 6)
-        //чтобы не переводить каждую точку в мировую систему координат, 
-        //наоборот переведем вектор направления в систему координат нашего объекта:
-        Vec3D transformedDirection = (invModel()*direction).normalized();
+
+       
         //находим расстояние до каждой точки. 
-        double distance = (model()*it).dot(transformedDirection);
+        double distance = it.dot(transformedDirection);
+
+
+        //переведем точку в мировую систему координат (но без смещения - только поворот, т.к. этого достаточно чтобы найти крайнюю точку)
+        //находим расстояние до каждой точки. 
+        //(это точно работает, но мы будем использовать transformedDirection чтобы уменьшить вычисления)
+        //double distance = (model()*it).dot(direction.normalized());
+
+
         if(distance > maxDistance){
             //если расстояние (проекция на вектор направления) больше чем у нас было сохранено, то запоминаем эти значения:
             maxDistance = distance;
@@ -75,7 +86,7 @@ Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
 Vec3D RigidBody::_support(std::shared_ptr<RigidBody> obj, const Vec3D &direction) {
     // TODO: implemented (lesson 6)
     Vec3D p1 = _findFurthestPoint(direction);
-    Vec3D p2 = _findFurthestPoint(-direction);
+    Vec3D p2 = obj->_findFurthestPoint(-direction);
     //возвращаем точку разности Миньковского:
     return p1 - p2;
 }
@@ -118,6 +129,11 @@ NextSimplex RigidBody::_lineCase(const Simplex &points) {
         //сначала находим вектор который смотрин перпендикулярно плоскости: ab.cross(ao),
         //а потом - в направлении о (начала координат): ..cross(ab);
         newDirection = ab.cross(ao).cross(ab);
+
+        //if(newDirection == Vec3D(0,0,0)){
+        //    return NextSimplex{newPoints, newDirection, true};
+        //}
+
     }else{
         //иначе (вектор ab смотрит не в сторону начала координат)
         //точку b можно удалить, и поискать точку в направлении начала координат.
@@ -277,7 +293,6 @@ std::pair<bool, Simplex> RigidBody::checkGJKCollision(std::shared_ptr<RigidBody>
             // внутри которого мы нашли начало координат)
             return std::make_pair(true, points);//collision
         }
-        break;
     }
     //если мы вышли из цикла(закончили все итерации), но так и незакончили поиск 
     //то будем считать что нет никакого столкновения.
