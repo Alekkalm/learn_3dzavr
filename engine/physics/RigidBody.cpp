@@ -330,9 +330,72 @@ CollisionInfo RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody> 
     size_t iters = 0;
     //пока не найдем хоть какойнибудь minDistance, или не пройдемся по всем точкам по 3 раза
     while (minDistance == std::numeric_limits<double>::max() && iters++ < size() + obj->size()) {
-        // TODO: implement (lesson 7)
+        // TODO: implemented (lesson 7)
+        minNormal = normals[minFace].normal;
+        minDistance = normals[minFace].distance;
 
-        break;
+        //ищем новую точку в направлении нормали
+        Vec3D support = _support(obj, minNormal);
+        //проверяем: действительно ли новая точка новая, а не та которая уже была в нашем симплексе
+        double sDistance = minNormal.dot(support); //расстояние до поверхности по нормали.
+        
+        //если разница между этими расстояниями оказалось больше числа эпсилон, то
+        //мы производим добавление новой точки
+        //в противном случае:
+        //мы не обновляем minDistance, а так как она уже не равна бесконечности, то цикл While закончится
+        if(std::abs(sDistance - minDistance) > Consts::EPA_EPS){
+             minDistance = std::numeric_limits<double>::max();//делаем minDistance = бесконечности, чтобы цикл While не закончился 
+
+             //теперь будем добавлять грани.
+             //1. нужно определить какие стороны граней являются уникальными
+             std::vector<std::pair<size_t, size_t>> uniqueEdges;//уникальные стороны (т.е. ребра)
+
+             size_t f = 0; //переменная f для того чтобы сохранять сдвиг
+
+             for(auto& normal : normals){ //проходим по всем нормалям
+                //если новая точка находится в направлении нормали,
+                //то для этой грани нужно будет тоже находить уникальные стороны
+                if(normal.normal.dot(support) > 0) {
+                    //передаем в функцию - коллекцию уникальных сторон, коллекцию граней, индексы точек - сторону, которую мы хотим добавить.
+                    uniqueEdges = _addIfUniqueEdge(uniqueEdges, faces, f + 0, f + 1);
+                    uniqueEdges = _addIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2);
+                    uniqueEdges = _addIfUniqueEdge(uniqueEdges, faces, f + 2, f + 0);
+
+                    //удаляем грань (т.е. точки грани), которая учавствует при добавлении новой вершины
+                    faces.erase(faces.begin() + f);
+                    faces.erase(faces.begin() + f);
+                    faces.erase(faces.begin() + f);
+                }else{ //если нормаль грани находится не в направлении новой точки, то
+                        //просто сдвигаем индекс f на 3:
+                        f +=3;
+                }
+            }
+            //У нас есть уникальные стороны, и все грани которые учавствовали в формировании уникальных сторон были удалены
+            //теперь нужно добавить новые грани в наш массив
+            std::vector<size_t> newFaces;
+            newFaces.reserve(uniqueEdges.size()*3);//резервируем размер массива (определяется количеством уникальных сторон)
+
+            //для всех индексов уникальных граней мы создаем отдельно от старых - новые грани (newFaces) :
+            for(auto[i1, i2] : uniqueEdges){
+                //добавляем две наши вершины, а третьей вершиной является новая найденная вершина.
+                newFaces.push_back(i1);
+                newFaces.push_back(i2);
+                newFaces.push_back(polytope.size());//точку в политоп мы еще не добавили, но индекс на нее все равно можно уже указать
+            }
+
+            //добавляем нашу новую точку в политоп:
+            //(расширяем наш симплекс)
+            polytope.push_back(support);
+
+            //ко всем старым граням нужно добавить новые грани
+            faces.insert(faces.end(), newFaces.begin(), newFaces.end());
+
+            //осталось посчитать новые вектора нормалей для всех граней 
+            //и вычислить минимальные расстояния:
+            auto newFaceNormals = _getFaceNormals(polytope, faces);
+            normals = std::move(newFaceNormals.first);
+            minFace = newFaceNormals.second;
+        }
     }
 
     _collisionNormal = minNormal;
@@ -385,6 +448,7 @@ RigidBody::_getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector
     return {normals, nearestFaceIndex};
 }
 
+//метод добавляет уникальные стороны
 std::vector<std::pair<size_t, size_t>>
 RigidBody::_addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces,
                             size_t a, size_t b) {
@@ -397,13 +461,31 @@ RigidBody::_addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges,
     //    / A \ /    B: 0-2
     //   1-->--2
 
-    // TODO: implement (lesson 7)
+    // TODO: implemented (lesson 7)
+    //в эту функцию передаются только стороны, принадлежащие граням с вектором нормали в сторону новой точки.
+    //дальше - непонятки, т.к. точки вроде не выстроены в правильной очередности чтобы нормали смотрели наружу..?
 
+    //если мы будем передвигаться по соседним неуникальным сторонам, то они будут ориентированы в противоположную сторону
+    //поэтому чтобы убедится что сторона аб уже содержится в массиве, нужно искать сторону ба.
+
+    //ищем в коллеции уникальных сторон, сторону с противоположными индексами.
+    auto reverse = std::find(newEdges.begin(), newEdges.end(), std::make_pair(faces[b], faces[a]));
+
+    //если нашли
+    if(reverse != newEdges.end()){
+        newEdges.erase(reverse);//то стираем найденный. то есть это ребро неуникальное, и оно нам ненужно совсем.
+    }else{ //если такого еще небыло
+        newEdges.emplace_back(faces[a], faces[b]);//добавляем в коллекцию уникальных.
+    }
     return newEdges;
 }
 
 void RigidBody::solveCollision(const CollisionInfo &collision) {
-    // TODO: implement (lesson 7)
-
+    // TODO: implemented (lesson 7)
+    //нам нужно переместить первое тело относительно второго
+    //CollisionInfo - это то что мы возвращали из метода EPA: вектор нормали ближайшей к центру грани, и расстояние до ближайшей грани.
+    //поэтому двигаем тело в обратном направлении (в направлении к центру), на величину расстояния до ближайшей грани.
+    translate(-collision.normal * collision.depth);
+    //это странный виртуальный метод, который нигде не определен. 
     collisionCallBack(collision);
 }
