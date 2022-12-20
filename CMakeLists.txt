@@ -7,7 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(${CMAKE_PROJECT_NAME}
         # custom files:
-        lesson6.cpp
+        lesson7.cpp
         # 3d engine:
         engine/Consts.h
         engine/math/Vec4D.h
