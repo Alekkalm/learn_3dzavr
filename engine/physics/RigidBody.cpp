@@ -304,7 +304,14 @@ CollisionInfo RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody> 
     // It uses a simplex from GJK around and expand it to the border.
     // The goal is to calculate the nearest normal and the intersection depth.
 
+    //создаем коллекцию точек (из коллекции точек симплекса) которую мы назовем polytop - т.е. многогранник.
+    //(видимо есть такой конструкотор у коллекции, когда ей передают начальный и конечный итератор другой коллекции)
     std::vector<Vec3D> polytope(simplex.begin(), simplex.end());
+    //создаем коллекцию целых чисел - которые будут являться гранями нашего политопа
+    //(size_t - базовый беззнаковый целочисленнй тип, обычно применяется для счетчиков цикла и индексации массива)
+    //тут мне пока непонятно, как мы узнали правильное расположение точек..
+    //возможно что если 0,1,2 - это поверхность которая смотрит наружу, то точка 3 находится с обратной стороны нормали,
+    //и на основе этих знаний мы записали расположение всех граней.
     std::vector<size_t> faces = {
             0, 1, 2,
             0, 3, 1,
@@ -336,33 +343,43 @@ CollisionInfo RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody> 
 
 std::pair<std::vector<FaceNormal>, size_t>
 RigidBody::_getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector<size_t> &faces) {
-    std::vector<FaceNormal> normals;
-    normals.reserve(faces.size() / 3);
+    //объявляем временные переменные:
+    std::vector<FaceNormal> normals; //коллекция нормалей (будут в той же последовательности что и грани(поверхности) политопа)
+    normals.reserve(faces.size() / 3); //размер коллекции нормалей (т.к. faces - это номера вершин каждого треугольника, то номера вершин повторяются в соседних треугольника, поэтому их в 3 раза больше чем треугольников)
     size_t nearestFaceIndex = 0;
     double minDistance = std::numeric_limits<double>::max();
 
+    //перебираем все треугольники
     for (size_t i = 0; i < faces.size(); i += 3) {
         Vec3D a = polytope[faces[i + 0]];
         Vec3D b = polytope[faces[i + 1]];
         Vec3D c = polytope[faces[i + 2]];
 
+        //создаем вектор нормали для треугольника
         Vec3D normal = (b - a).cross(c - a).normalized();
 
+        //у всех точек плоскости проекция на вектор нормали одинаковая и равна расстоянию от начала координат до плоскости.
+        //поэтому берем любую точку, например а: 
         double distance = normal.dot(a);
 
+        //если расстояние оказалось отрицательным, значит вектор нормали смотрит в сторну начала координат, (т.е. внутрь фигуры)
+        //поэтому меняем ему знак, чтобы он смотрел наружу
         if (distance < -Consts::EPS) {
             normal = -normal;
             distance *= -1;
         }
 
+        //складываем в конец, чтобы первый остался первым.
         normals.emplace_back(FaceNormal{normal, distance});
 
+        //находим минимальное расстояние
         if (distance < minDistance) {
             nearestFaceIndex = i / 3;
             minDistance = distance;
         }
     }
 
+    //возвращаем все найденные нормали (там внутри вектор нормали и расстояние до начала координат), и индекс самого ближайшего к центру
     return {normals, nearestFaceIndex};
 }
 
