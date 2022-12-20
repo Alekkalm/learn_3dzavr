@@ -312,6 +312,7 @@ CollisionInfo RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody> 
     //тут мне пока непонятно, как мы узнали правильное расположение точек..
     //возможно что если 0,1,2 - это поверхность которая смотрит наружу, то точка 3 находится с обратной стороны нормали,
     //и на основе этих знаний мы записали расположение всех граней.
+    //** оказывается дальше, в функции _getFaceNormals, мы проверяем направление нормалей, и исправляем, а расположение точек не меняем.
     std::vector<size_t> faces = {
             0, 1, 2,
             0, 3, 1,
@@ -319,14 +320,15 @@ CollisionInfo RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody> 
             1, 3, 2
     };
 
-    auto faceNormals = _getFaceNormals(polytope, faces);
-    std::vector<FaceNormal> normals = faceNormals.first;
-    size_t minFace = faceNormals.second;
+    auto faceNormals = _getFaceNormals(polytope, faces); //получаем коллекцию нормалей, и индекс ближайшей к центру
+    std::vector<FaceNormal> normals = faceNormals.first; //запоминаем коллекцию нормалей в локальную переменную
+    size_t minFace = faceNormals.second; //запоминаем индекс ближайшей к центру нормали
 
-    Vec3D minNormal = normals[minFace].normal;
+    Vec3D minNormal = normals[minFace].normal;//получаем вектор ближайшей нормали. 
     double minDistance = std::numeric_limits<double>::max();
 
     size_t iters = 0;
+    //пока не найдем хоть какойнибудь minDistance, или не пройдемся по всем точкам по 3 раза
     while (minDistance == std::numeric_limits<double>::max() && iters++ < size() + obj->size()) {
         // TODO: implement (lesson 7)
 
