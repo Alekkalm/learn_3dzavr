@@ -9,6 +9,9 @@
 #include "Vec3D.h"
 #include "../Consts.h"
 
+            #include <iostream>
+            #include <Windows.h> // Обязательно для SetConsoleCP() и SetConsoleOutputCP()
+
 Vec3D::Vec3D(const Vec3D &vec) {
     _arr_point[0] = vec.x();
     _arr_point[1] = vec.y();
@@ -93,11 +96,19 @@ Vec3D Vec3D::cross(const Vec3D &vec) const {
         //если не использовать OpenGL, то при векторном умножении появляются результаты = 0.
         //отчего это - не выяснял. Но на всякий случай - записал.
         //int nu = 0;
-        //if(v == Vec3D(0,0,0))
-        //{
+
+        if(v == Vec3D(0,0,0))
+        {
             //nu++; //векторное произведение = 0!!!! выходной вектор 0,0,0 - нет направления!!!!
             //throw std::domain_error{"Vec3D::method cross(const Vec3D &vec): result is Vec3D(0,0,0)"};
-        //}  
+
+            //#include <iostream>
+            //#include <Windows.h> // Обязательно для SetConsoleCP() и SetConsoleOutputCP()
+            SetConsoleCP(65001);
+            SetConsoleOutputCP(65001);
+            
+            std::cout << "результат векторного умножения: вектор 0-ой длинны" << std::endl;
+        }  
         return v;        
 }
 

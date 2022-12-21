@@ -378,8 +378,44 @@ CollisionInfo RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody> 
             //для всех индексов уникальных граней мы создаем отдельно от старых - новые грани (newFaces) :
             for(auto[i1, i2] : uniqueEdges){
                 //добавляем две наши вершины, а третьей вершиной является новая найденная вершина.
-                newFaces.push_back(i1);
-                newFaces.push_back(i2);
+
+
+
+
+
+
+
+
+                //проверяем чтобы нормаль смотрела наружу
+                Vec3D a = polytope[faces[i1]];
+                Vec3D b = polytope[faces[i2]];
+                Vec3D c = support;
+
+                //создаем вектор нормали для треугольника
+                Vec3D normal = (b - a).cross(c - a).normalized();
+
+                //у всех точек плоскости проекция на вектор нормали одинаковая и равна расстоянию от начала координат до плоскости.
+                //поэтому берем любую точку, например а: 
+                double distance = normal.dot(a);
+
+                //если расстояние оказалось отрицательным, значит вектор нормали смотрит в сторну начала координат, (т.е. внутрь фигуры)
+                //поэтому меняем ему знак, чтобы он смотрел наружу
+                if (distance < -Consts::EPS) {
+                        
+                    #include <iostream>
+                    #include <Windows.h> // Обязательно для SetConsoleCP() и SetConsoleOutputCP()
+                    SetConsoleCP(65001);
+                    SetConsoleOutputCP(65001);
+                    
+                    std::cout << "меняем направление нормали" << std::endl;
+
+                    newFaces.push_back(i2);
+                    newFaces.push_back(i1);
+                }else{
+                    newFaces.push_back(i1);
+                    newFaces.push_back(i2);
+                }
+
                 newFaces.push_back(polytope.size());//точку в политоп мы еще не добавили, но индекс на нее все равно можно уже указать
             }
 
@@ -432,6 +468,20 @@ RigidBody::_getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector
         if (distance < -Consts::EPS) {
             normal = -normal;
             distance *= -1;
+            	
+            #include <iostream>
+            #include <Windows.h> // Обязательно для SetConsoleCP() и SetConsoleOutputCP()
+            SetConsoleCP(65001);
+            SetConsoleOutputCP(65001);
+            
+            std::cout << "инверсия нормали: i= " << i << std::endl;//"\n";
+
+            //попробуем поменять местами вершины
+            //size_t b = faces[i + 1];
+            //size_t c = faces[i + 2];
+            //faces[i + 1] = c;
+            //faces[i + 2] = b;
+
         }
 
         //складываем в конец, чтобы первый остался первым.
