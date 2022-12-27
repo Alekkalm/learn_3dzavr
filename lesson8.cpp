@@ -21,11 +21,18 @@ public:
         cube->translate(Vec3D(0,0,20));
 
         // add animations
-        Timeline::addAnimation<ATranslate>(cube, Vec3D(0, 0, -10), 1);
+        Timeline::addAnimation<AShowCreation>(cube, 2, Animation::LoopOut::None, Animation::InterpolationType::Linear);
         Timeline::addAnimation<AWait>();
-        Timeline::addAnimation<ARotate>(cube, Vec3D(M_PI/2, M_PI, 3*M_PI/2), 1);
+        Timeline::addAnimation<ATranslate>(cube, Vec3D(0, 0, -10), 5);
+        Timeline::addAnimation<ARotate>(cube, Vec3D(M_PI/2, M_PI, 3*M_PI/2), 10);
+        Timeline::addAnimation<ADecompose>(cube, 1);
         Timeline::addAnimation<AWait>();
-        Timeline::addAnimation<AScale>(cube, Vec3D(3, 3, 3), 1);
+
+        //Timeline::addAnimation<ARotate>(cube, Vec3D(M_PI/2, M_PI, 3*M_PI/2), 1);
+        Timeline::addAnimation<AWait>();
+        Timeline::addAnimation<AScale>(cube, Vec3D(2, 2, 2), 1);
+        Timeline::addAnimation<AWait>();
+        Timeline::addAnimation<AShowUncreation>(cube, 1, Animation::LoopOut::None, Animation::InterpolationType::Linear);
 
         setGlEnable(true);
     }
