@@ -12,6 +12,7 @@ class AScale final : public Animation {
 private:
     const std::weak_ptr<Object> _object;
     const Vec3D _scalingValue;
+    Vec3D _prevScaleFactor{1,1,1};
 
     void update() override {
         auto obj = _object.lock();
@@ -21,7 +22,12 @@ private:
             return;
         }
 
-        // TODO: implement (lessons 8)
+        // TODO: implemented (lessons 8)
+        obj->scale(Vec3D(1/_prevScaleFactor.x(), 1/_prevScaleFactor.y(), 1/_prevScaleFactor.z()));
+        Vec3D scaleFactor = Vec3D{1,1,1} + (_scalingValue - Vec3D(1,1,1)) * progress();
+
+        obj->scale(scaleFactor);
+        _prevScaleFactor = scaleFactor;
     }
 
 public:

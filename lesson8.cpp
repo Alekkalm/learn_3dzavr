@@ -21,11 +21,11 @@ public:
         cube->translate(Vec3D(0,0,20));
 
         // add animations
-        Timeline::addAnimation<ATranslate>(cube, Vec3D(0, 0, -10), 5);
+        Timeline::addAnimation<ATranslate>(cube, Vec3D(0, 0, -10), 1);
         Timeline::addAnimation<AWait>();
-        Timeline::addAnimation<ARotate>(cube, Vec3D(M_PI/2, M_PI, 3*M_PI/2), 5);
+        Timeline::addAnimation<ARotate>(cube, Vec3D(M_PI/2, M_PI, 3*M_PI/2), 1);
         Timeline::addAnimation<AWait>();
-        Timeline::addAnimation<AScale>(cube, Vec3D(3, 3, 3), 5);
+        Timeline::addAnimation<AScale>(cube, Vec3D(3, 3, 3), 1);
 
         setGlEnable(true);
     }

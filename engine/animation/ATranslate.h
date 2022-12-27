@@ -21,7 +21,8 @@ private:
             return;
         }
 
-        // TODO: implement (lessons 8)
+        // TODO: implemented (lessons 8)
+        obj->translate(_translationValue * dprogress());
     }
 
 public:
