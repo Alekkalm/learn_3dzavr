@@ -7,6 +7,7 @@
 #include "../utils/Log.h"
 
 ServerUDP::ServerUDP() {
+     //timeoutCallBack функция призвана удалять соединения от сервера
     _socket.setTimeoutCallback([this](sf::Uint16 playerId) { return timeout(playerId); });
 }
 
@@ -14,8 +15,8 @@ bool ServerUDP::isWorking() const {
     return _working;
 }
 
-bool ServerUDP::start(sf::Uint16 port) {
-    _working = _socket.bind(port);
+bool ServerUDP::start(sf::Uint16 port) { //когда мы стартуем сервер
+    _working = _socket.bind(port);       //мы биндимся к порту
 
     if (_working) {
         Log::log("ServerUDP::start(): the server was successfully started.");
@@ -31,11 +32,11 @@ void ServerUDP::update() {
         return;
     }
 
-    while (process()) {}
+    while (process()) {} //получаем сообщения
 
     // World state broadcast
     if (Time::time() - _lastBroadcast > 1.0 / Consts::NETWORK_WORLD_UPDATE_RATE) {
-        broadcast();
+        broadcast(); //в клиенте мы делаем в этом месте update, а здесь мы делаем broadcast (отправляем всем клиентам какую либо информацию)
         _lastBroadcast = Time::time();
     }
 
@@ -45,10 +46,11 @@ void ServerUDP::update() {
     updateInfo();
 }
 
+//когда мы вызываем функцию Stop:
 void ServerUDP::stop() {
     for (auto it = _clients.begin(); it != _clients.end();) {
         sf::Packet packet;
-        packet << MsgType::Disconnect << *it;
+        packet << MsgType::Disconnect << *it; //посылаем всем клиентам что они отсоединены от сервера
         _socket.send(packet, *it);
         _clients.erase(it++);
     }
@@ -61,11 +63,12 @@ void ServerUDP::stop() {
     Log::log("ServerUDP::stop(): the server was killed.");
 }
 
+//сервер вызывает функцию Таймаут - когда от playerId давно небыло никаких сообщений.
 bool ServerUDP::timeout(sf::Uint16 playerId) {
     sf::Packet packet;
-    packet << MsgType::Disconnect << playerId;
+    packet << MsgType::Disconnect << playerId; //всем клиентам отправляем сообщение что этого игрока нужно дисконектить.
 
-    _clients.erase(playerId);
+    _clients.erase(playerId); //и удаляем этого клиента
 
     for (auto client : _clients) {
         _socket.sendRely(packet, client);
@@ -84,29 +87,30 @@ bool ServerUDP::process() {
     sf::Packet sendPacket;
     sf::Uint16 senderId;
 
-    MsgType type = _socket.receive(packet, senderId);
+    MsgType type = _socket.receive(packet, senderId);//считываем пакет и id отправителя
 
     if (type == MsgType::Empty) {
         return false;
     }
 
+    //и дальше по типу сообщения смотрит как отвечать и как реагировать.
     switch (type) {
         // here we process any operations based on msg type
-        case MsgType::Connect:
+        case MsgType::Connect:  //если произошло соединение
             Log::log("ServerUDP::process(): client Id = " + std::to_string(senderId) + " connecting...");
-
+            //здесь по видео должно быть _clients.insert(senderId); видимо произошли улучнения какие-то
             processConnect(senderId);
             break;
         case MsgType::ClientUpdate:
 
             processClientUpdate(senderId, packet);
             break;
-        case MsgType::Disconnect:
+        case MsgType::Disconnect: //когда произошел дисконнект:
             Log::log("ServerUDP::process(): client Id = " + std::to_string(senderId) + " disconnected.");
 
-            sendPacket << MsgType::Disconnect << senderId;
-            _clients.erase(senderId);
-            _socket.removeConnection(senderId);
+            sendPacket << MsgType::Disconnect << senderId;  //отправляем всем клиентам что произоше дисконнект
+            _clients.erase(senderId);       //удаляем из клиентов senderId
+            _socket.removeConnection(senderId); //удаляем его Connection
             for (auto client : _clients) {
                 _socket.sendRely(sendPacket, client);
             }

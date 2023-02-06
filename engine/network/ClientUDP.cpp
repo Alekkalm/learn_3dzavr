@@ -37,14 +37,20 @@ void ClientUDP::update() {
         return;
     }
 
+    //крутимся в бесконечном цикле, пока не получим все собщения пришедшие (пока process не вернет false).
+    //  Если process вернет true - значит было получено сообщение
     while (isWorking() && process()) {}
 
+
+    //после того как мы обработали все получения сообщения
+    //мы отправляем пакет серверу
     // Send new client information to server
     if (Time::time() - _lastBroadcast > 1.0 / Consts::NETWORK_WORLD_UPDATE_RATE && connected()) {
         updatePacket();
-        _lastBroadcast = Time::time();
+        _lastBroadcast = Time::time();//последний раз мы отправляли сообщение - сейчас.
     }
 
+    //обновляем сокет..
     // Socket update
     _socket.update();
 }
@@ -52,12 +58,12 @@ void ClientUDP::update() {
 void ClientUDP::disconnect() {
     sf::Packet packet;
     packet << MsgType::Disconnect << _socket.ownId();
-    _socket.send(packet, _socket.serverId());
-    _socket.unbind();
-    _working = false;
+    _socket.send(packet, _socket.serverId());//отправляем сообщение что произошел Disconnect
+    _socket.unbind(); //отключаемся от сокета
+    _working = false; //выставляем статус - что не работаем
 
     Log::log("ClientUDP::disconnect(): disconnected from the server.");
-    processDisconnected();
+    processDisconnected(); //вызываем виртуальную функцию. (например здесь мы можем удалять всех игроков с карты)
 }
 
 bool ClientUDP::timeout(sf::Uint16 id) {
@@ -66,10 +72,11 @@ bool ClientUDP::timeout(sf::Uint16 id) {
     if (id != _socket.serverId()) {
         return true;
     }
-    disconnect();
+    disconnect(); //если таймаут, то вызываем функцию disconnect
     return false;
 }
 
+//получение пакета
 // Recive and process message.
 // Returns true, if some message was received.
 bool ClientUDP::process() {
@@ -88,9 +95,9 @@ bool ClientUDP::process() {
 
     switch (type) {
         // here we process any operations based on msg type
-        case MsgType::Init:
-            packet >> targetId;
-            _socket.setId(targetId);
+        case MsgType::Init:             //если инициализация
+            packet >> targetId;         //значит сервер назначил нам id
+            _socket.setId(targetId);    //сохраняем его
 
             Log::log("ClientUDP::process(): client Id = " + std::to_string(targetId) + " connected.");
 
@@ -100,29 +107,29 @@ bool ClientUDP::process() {
 
             processUpdate(packet);
             break;
-        case MsgType::NewClient:
+        case MsgType::NewClient://мы получили нового клиента
 
             Log::log("ClientUDP::process(): new client init...");
 
             processNewClient(packet);
             break;
-        case MsgType::Disconnect:
-            packet >> targetId;
-            if (targetId == _socket.ownId()) {
-                disconnect();
+        case MsgType::Disconnect://произошел Disconnect
+            packet >> targetId; 
+            if (targetId == _socket.ownId()) { //если id равен нашему id
+                disconnect();                  //значит нам нужно отключиться от сервера.
             }
 
             Log::log("ClientUDP::process(): client Id = " + std::to_string(targetId) + " disconnected from the server");
 
-            processDisconnect(targetId);
+            processDisconnect(targetId); //передаем id того кто отключается.
             break;
-        case MsgType::Custom:
+        case MsgType::Custom: //дополнительный пользовательский пакет
             processCustomPacket(packet);
             break;
         case MsgType::Error:
             Log::log("ClientUDP::process(): Error message");
             break;
-        default:
+        default: //получили вообще неизвестный пакет
             Log::log("ClientUDP::process(): unknown message type " + std::to_string(static_cast<int>(type)));
     }
 
