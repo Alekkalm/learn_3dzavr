@@ -20,7 +20,7 @@ bool ReliableMsg::trySend(sf::UdpSocket &socket) {
     if (Time::time() - firstTry > Consts::NETWORK_TIMEOUT) {
         return false;
     }
-    if (Time::time() - lastTry > Consts::NETWORK_RELIABLE_RETRY_TIME) {
+    if (Time::time() - lastTry > Consts::NETWORK_RELIABLE_RETRY_TIME) {//похоже на косяк, что до отсюда дело недойдет..
         lastTry = Time::time();
         socket.send(packet, address, port);
     }
