@@ -55,13 +55,17 @@ sf::Uint16 UDPSocket::serverId() const {
     return _serverId;
 }
 
+//надежная(с ожиданием подтверждения) отправка по ip и port
 void UDPSocket::sendRely(const sf::Packet &packet, const sf::IpAddress &ip, sf::Uint16 port) {
     sf::Packet finalPacket;
+    //формируем заголовок:
+    // "id-отправителя"    "нужно отвечать"  "id-этого важного сообщения"
     finalPacket << _ownId << true << _nextRelyMsgId;
     finalPacket.append(packet.getData(), packet.getDataSize());
     _relyPackets.insert({_nextRelyMsgId++, ReliableMsg(finalPacket, ip, port)});
 }
 
+//надежная(с ожиданием подтверждения) отправка по id
 void UDPSocket::sendRely(const sf::Packet &packet, sf::Uint16 id) {
     if (!_connections.count(id)) {
         return;
@@ -69,13 +73,17 @@ void UDPSocket::sendRely(const sf::Packet &packet, sf::Uint16 id) {
     this->sendRely(packet, _connections.at(id).ip(), _connections.at(id).port());
 }
 
+//отправка по ip и port
 void UDPSocket::send(const sf::Packet &packet, const sf::IpAddress &ip, sf::Uint16 port) {
     sf::Packet finalPacket;
+    //формируем заголовок:
+    // "id-отправителя"    "ненужно отвечать"  "id-куда нужно отправить"
     finalPacket << _ownId << false << _serverId;
     finalPacket.append(packet.getData(), packet.getDataSize());
     _socket.send(finalPacket, ip, port);
 }
 
+//отправка по id
 void UDPSocket::send(const sf::Packet &packet, sf::Uint16 id) {
     if (!_connections.count(id)) {
         return;
@@ -83,26 +91,31 @@ void UDPSocket::send(const sf::Packet &packet, sf::Uint16 id) {
     this->send(packet, _connections.at(id).ip(), _connections.at(id).port());
 }
 
-void UDPSocket::update() {
+void UDPSocket::update() { //обновляем все коннекшены
     for (auto it = _connections.begin(); it != _connections.end();) {
         if (!it->second.timeout()) {
             ++it;
         } else {
-            if (_timeoutCallback && !_timeoutCallback(it->first)) {
-                return;
-            }
-            _connections.erase(it++);
+            if (_timeoutCallback && !_timeoutCallback(it->first)) { //если задана функция CallBack то мы её вызываем
+                return;                                             //если функция вернула false - это значит обрыв от сервера,
+            }                                                       //т.е. сервер давно не отвечает, и можно уже не обрабатывать остальные подключения
+
+            _connections.erase(it++);                               //иначе - это обрыв от клиента, удаляем это подключение
         }
     }
 
+    //отправляем сообщения
     for (auto it = _relyPackets.begin(); it != _relyPackets.end();) {
-        if (!it->second.trySend(_socket)) {
-            _relyPackets.erase(it++);
+        if (!it->second.trySend(_socket)) { //если отправить не удалось, 
+            _relyPackets.erase(it++);       //то мы его удаляем
         } else {
-            ++it;
+            ++it;                           //иначе - идем к следующему сообщению.
         }
     }
 
+    //времена подтверждения важных сообщений
+    //(они хранятся чтобы увидеть что подтверждение не дошло до адресата.)
+    //если подтверждения были давно, то срок хранения можно считать законченым, и удаляем эти данные.
     for (auto it = _confirmTimes.begin(); it != _confirmTimes.end();) {
         if (Time::time() - it->second > Consts::NETWORK_TIMEOUT) {
             _confirmTimes.erase(it++);
@@ -112,6 +125,7 @@ void UDPSocket::update() {
     }
 }
 
+//прием сообщений
 MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
     // Receive message
     sf::IpAddress ip;
@@ -119,10 +133,11 @@ MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
 
     packet.clear();
     if (_socket.receive(packet, ip, port) != sf::Socket::Status::Done) {
-        return MsgType::Empty;
+        return MsgType::Empty;//если сообщение небыло получено, то возвращает пустое сообщение
     }
+    //в противном случае мы идем дальше
 
-    // Read header
+    // Read header (расшифровываем наш заголовок)
     bool reply = false;
     sf::Uint16 msgId = 0;
     MsgType type;
@@ -131,49 +146,63 @@ MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
         return MsgType::Error;
     }
 
+    //теперь мы знаем кто именно отправил нам сообщение, 
+    //и в соединении с этим id делаем update.
     if (_connections.count(senderId)) {
-        _connections.at(senderId).update();
+        _connections.at(senderId).update(); //т.е. обновить время последнего получения сообщения
     }
 
-    if (type == MsgType::Confirm) {
+    //дальше мы смотрим какой именно тип сообщения мы получили
+    if (type == MsgType::Confirm) {//если это подтверждение, то мы стираем сообщение из списка важных
         _relyPackets.erase(msgId);
         // you don't need this information on the highest levels
         return MsgType::Empty;
     }
 
-    if (type == MsgType::Connect) {
-        sf::Uint32 version = 0;
-        if (!(packet >> version) || version != Consts::NETWORK_VERSION) {
-            return MsgType::Error;
+    if (type == MsgType::Connect) {//подключение нового клиента
+        sf::Uint32 version = 0; //версия - это какая версия нашей реализации протокола 
+        if (!(packet >> version) || version != Consts::NETWORK_VERSION) { //если наша версия и версия полученная из пакета не совпадает
+            return MsgType::Error;//просто возвращаем сообщение об ошибке. ни как не интерпретируем и не пытаемся обработать
         }
+
+        //выбираем id для нового пользователя
         sf::Uint16 tmp;
-        for (tmp = Consts::NETWORK_MAX_CLIENTS; tmp >= 1; tmp--) {
-            if (!_connections.count(tmp)) {
-                senderId = tmp;
-            } else if (_connections.at(tmp).same(ip, port)) {
-                return MsgType::Error;
-            }
+        for (tmp = Consts::NETWORK_MAX_CLIENTS; tmp >= 1; tmp--) { //перебираем все подряд от максимального до 0 (можно было сделать и наоборот?)
+            if (!_connections.count(tmp)) {//если такого еще нет (этот id свободен)
+                senderId = tmp;             //то выбираем это id
+            } else if (_connections.at(tmp).same(ip, port)) { //иначе если этот id уже занят, проверяем, не такой же у него ip и port
+                return MsgType::Error;                        //чтобы небыло несколько подключений с одинаковыми ip и портом.
+            }                                                 //т.е. вдруг клиент шлет несколько раз запрос на подключение - добавляем его толко один раз
         }
+
+        //создаем новое подключение и добавляем его в наш словарь подключений.
         _connections.insert({senderId, UDPConnection(senderId, ip, port)});
     }
 
-    if (!_connections.count(senderId) || !_connections.at(senderId).same(ip, port) ||
-        reply && confirmed(msgId, senderId)) {
-        return MsgType::Error;
+    //проверяем что все нормально сработало
+    if (!_connections.count(senderId) ||            //что подключение с новым id есть в списке подключений
+     !_connections.at(senderId).same(ip, port) ||   //что у подключения с новым id правильныей ip и port
+        reply && confirmed(msgId, senderId)) {      //если нужно ответить, отправляем ответ и проверяем "это уже повторное подтверждение?" 
+        return MsgType::Error;                   //если одно из условий сработало, то возвращаем ошибку.
     }
     return type;
 }
 
+//функция подтверждения
 bool UDPSocket::confirmed(sf::Uint16 msgId, sf::Uint16 senderId) {
     sf::Packet confirmPacket;
+    //формируем пакет
+    // "свой id"  "на это сообщение уже отвечать ненужно" "id сообщения которое подтверждаем"  "говорим что это тип - подтверждение"
     confirmPacket << _ownId << false << msgId << MsgType::Confirm;
-    _connections.at(senderId).send(_socket, confirmPacket);
+    _connections.at(senderId).send(_socket, confirmPacket); //отправляем
 
+    //создаем уникальный id состоящий из id отправителя и id сообщения
+    //соединяем два 16-битных числа в одно 32-битное
     sf::Uint32 confirmId;
-    confirmId = (senderId << 16) | msgId;
+    confirmId = (senderId << 16) | msgId;//сдвигаем на 16 бит и делаем "побитное или" 
 
-    bool repeat = _confirmTimes.count(confirmId);
-    _confirmTimes[confirmId] = Time::time();
+    bool repeat = _confirmTimes.count(confirmId);//подтверждали ли мы это сообщение раньше (есть ли такой у нас в сохраненных)
+    _confirmTimes[confirmId] = Time::time();//запоминаем время когда мы отправили сообщение о получении важного сообщения
 
     return repeat;
 }

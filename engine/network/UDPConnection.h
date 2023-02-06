@@ -12,7 +12,7 @@ private:
     const sf::Uint16 _id;
     const sf::IpAddress _ip;
     const sf::Uint16 _port;
-    double lastMsg;
+    double lastMsg;//АК: время последнего полученного сообщения с этого адреса
 
 public:
     explicit UDPConnection(sf::Uint16 id, sf::IpAddress ip, sf::Uint16 port);
