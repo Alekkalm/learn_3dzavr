@@ -19,12 +19,31 @@ private:
     bool is_camera_controlling = false;
 
     void initNetwork() {
-        // TODO: implement (lesson 10)
+        // TODO: implemented (lesson 10)
 
+        //здесь мы должны:
+        //подключить сервер, подключить клиент
+        //выбрать ip, выбрать порт, и т.д.
+
+
+        std::string clientIp = "127.0.0.1"; //если clientIp совпадает с localHost - это значит что мы должны еще и запустить сервер
+        sf::Uint16 clientPort = 54000;
+        sf::Uint16 serverPort = 54000;
+
+        if(clientIp == sf::IpAddress::LocalHost){ //если два приложения запустить на одном же комптьютере с   clientIp = "127.0.0.1"
+            server->start(serverPort);            //то, т.к. первый сервер уже порт занял, то второй сервер не сможет запуститься.
+        }
+
+        //подписываемся на событие клиента.
+        //клиент будет будет дергать событие, и будет выполнятся функция spawnPlayer(id).
+        client->setSpawnPlayerCallBack([this](sf::Uint16 id){spawnPlayer(id); });
+        client->setRemovePlayerCallBack([this](sf::Uint16 id){removePlayer(id); });
+
+        client->connect(clientIp, clientPort);
     }
 
 public:
-    Lesson10() : playerController(player, keyboard, mouse) {};
+    Lesson10() : playerController(player, keyboard, mouse) {}; //конструктор
 
     void start() override {
 
@@ -33,43 +52,58 @@ public:
         setGlEnable(true);
         initNetwork();
 
-        while (client->isWorking() && !client->connected()) {
+        while (client->isWorking() && !client->connected()) { //пока клиент работает, и не подключен к серверу, крутимся здесь, ждем подключения
             client->update();
             server->update();
             Time::update();
         }
     }
 
-    void update() override {
+    void update() override { //апдейт - делаем после того как вышли из цикла "подключение"
 
-        server->update();
-        client->update();
+        server->update(); //если сервер не запускали, то он не будет обновлятся.
+        client->update();//сам игрок подключается к самому себе же (если у него белый IP)
 
         // Check all input after this condition please
         if (!screen->hasFocus()) {
             return;
         }
 
-        if(keyboard->isKeyPressed(sf::Keyboard::Escape)) {
+        if(keyboard->isKeyPressed(sf::Keyboard::Escape)) { //не вышли ли мы из игры
             exit();
         }
 
-        if(keyboard->isKeyTapped(sf::Keyboard::C)) {
+        if(keyboard->isKeyTapped(sf::Keyboard::C)) { //нажали ли мы на кнопку "С" или нет. Если нажали то перестаем контролировать камеру.
             is_camera_controlling = !is_camera_controlling;
         }
 
-        if(is_camera_controlling) {
+        if(is_camera_controlling) { //если камеру нужно контролировать, то мы обновляем ПлейерКонтроллер
             playerController.update();
         }
     }
-    void spawnPlayer(sf::Uint16 id) {
+
+    
+    void spawnPlayer(sf::Uint16 id) { //появление (рождение) игрока
         // TODO: implement (lesson 10)
 
+        //что у нас происходит когда спавнится новый игрок:
+        //1. нужно задать ему имя
+        std::string name = "Player_" + std::to_string(id);
 
+        //создадим объект которому присвоим это имя
+        auto newPlayer = std::make_shared<RigidBody>(ObjectNameTag(name), "obj/cube.obj");
+        //добавим его на карту
+        world->addBody(newPlayer);
+        //и добавим его же в коллекцию к клиенту:
+        client->addPlayer(id, newPlayer);
     }
-    void removePlayer(sf::Uint16 id) {
-        // TODO: implement (lesson 10)
 
+
+    void removePlayer(sf::Uint16 id) { //удаление игрока
+        // TODO: implemented (lesson 10)
+
+        //мы должны обратится к миру и передать ему имя
+        world->removeBody(ObjectNameTag("Player_" + std::to_string(id)));
     }
 };
 

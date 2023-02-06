@@ -10,8 +10,8 @@
 
 class Client : public ClientUDP {
 private:
-    std::map<sf::Uint16, std::shared_ptr<RigidBody>> _players{};
-    std::shared_ptr<RigidBody> _player;
+    std::map<sf::Uint16, std::shared_ptr<RigidBody>> _players{};//клиент хранит всех игроков. Здесь не object, а RigidBody - потому что физику видимо здесь будем обрабатывать
+    std::shared_ptr<RigidBody> _player; //это мы сами
 
     std::function<void(sf::Uint16)> _spawnPlayerCallBack;
     std::function<void(sf::Uint16)> _removePlayerCallBack;
