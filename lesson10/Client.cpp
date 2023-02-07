@@ -21,12 +21,14 @@ void Client::processInit(sf::Packet &packet) {
     double x, y, z;
 
     while (packet >> targetId >> x >> y >> z){ //получаем координаты
-        if(_spawnPlayerCallBack != nullptr){
-            _spawnPlayerCallBack(targetId); //создаем игрока.. Наконец: это видимо и есть событие. Точнее в нашем случае - просто запускаем на выполнение делегат.
-        }                                   //здесь уже создался новый игрок и на карте он появился.
+        if(targetId != _socket.ownId()){ //это вроде лишнее, т.к. мы на сервере не отправляем его, но пока делаю как на видео в уроке.
+            if(_spawnPlayerCallBack != nullptr){
+                _spawnPlayerCallBack(targetId); //создаем игрока.. Наконец: это видимо и есть событие. Точнее в нашем случае - просто запускаем на выполнение делегат.
+            }                                   //здесь уже создался новый игрок и на карте он появился.
 
-        //осталось сместить этого игрока в ту точку, которую мы прочитали
-        _players[targetId]->translateToPoint(Vec3D(x, y, z));
+            //осталось сместить этого игрока в ту точку, которую мы прочитали
+            _players[targetId]->translateToPoint(Vec3D(x, y, z));
+        }
     }
 }
 
