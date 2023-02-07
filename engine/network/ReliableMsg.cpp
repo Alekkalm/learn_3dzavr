@@ -17,10 +17,10 @@ ReliableMsg::ReliableMsg(const ReliableMsg &msg) : packet(msg.packet), address(m
                                                    lastTry(msg.lastTry), firstTry(msg.firstTry) {}
 
 bool ReliableMsg::trySend(sf::UdpSocket &socket) {
-    if (Time::time() - firstTry > Consts::NETWORK_TIMEOUT) {
+    if (Time::time() - firstTry > Consts::NETWORK_TIMEOUT) {//если с самой первой отправки уже прошло 5сек, то больше не посылаем
         return false;
     }
-    if (Time::time() - lastTry > Consts::NETWORK_RELIABLE_RETRY_TIME) {//похоже на косяк, что до отсюда дело недойдет..
+    if (Time::time() - lastTry > Consts::NETWORK_RELIABLE_RETRY_TIME) {//если с последней отправки прошло больше 50мсек, то посылаем (первый раз, или еще раз)
         lastTry = Time::time();
         socket.send(packet, address, port);
     }
