@@ -26,6 +26,7 @@ void ClientUDP::connect(sf::IpAddress ip, sf::Uint16 port) {
     sf::Packet packet;
     packet << MsgType::Connect << Consts::NETWORK_VERSION;
     _working = _socket.bind(0);
+    _working ? Log::log("ClientUDP::connect(): Bound to Port 0") :Log::log("ClientUDP::connect(): Bound to port 0 failed")  ;
     _socket.addConnection(_socket.serverId(), ip, port);
     _socket.sendRely(packet, _socket.serverId());
 

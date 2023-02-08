@@ -7,6 +7,7 @@
 #include "UDPSocket.h"
 #include "../utils/Time.h"
 #include "../Consts.h"
+#include "../utils/Log.h"
 
 UDPSocket::UDPSocket() : _ownId(0), _nextRelyMsgId(0) {
     _socket.setBlocking(false);
@@ -21,6 +22,7 @@ void UDPSocket::removeConnection(sf::Uint16 id) {
 }
 
 bool UDPSocket::bind(sf::Uint16 port) { //присоединение к порту. Возвращаем статус: удалось или нет.
+    Log::log("UDPSocket::bind(): bind to port Number: " + std::to_string(port));
     return _socket.bind(port) == sf::Socket::Status::Done;
 }
 

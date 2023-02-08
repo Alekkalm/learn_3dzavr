@@ -19,7 +19,7 @@ bool ServerUDP::start(sf::Uint16 port) { //когда мы стартуем се
     _working = _socket.bind(port);       //мы биндимся к порту
 
     if (_working) {
-        Log::log("ServerUDP::start(): the server was successfully started.");
+        Log::log("ServerUDP::start(): the server was successfully started. Bound to port Number " + std::to_string(port));
     } else {
         Log::log("ServerUDP::start(): failed to start the server.");
     }
