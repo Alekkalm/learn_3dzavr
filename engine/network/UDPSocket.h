@@ -64,6 +64,8 @@ public:
     MsgType receive(sf::Packet &packet, sf::Uint16 &senderId);
 
     ~UDPSocket(); //деструктор
+
+    unsigned short GetLocalPort();//определяет к какому порту мы забиндены для прослушивания.
 };
 
 

@@ -22,7 +22,6 @@ void UDPSocket::removeConnection(sf::Uint16 id) {
 }
 
 bool UDPSocket::bind(sf::Uint16 port) { //присоединение к порту. Возвращаем статус: удалось или нет.
-    Log::log("UDPSocket::bind(): bind to port Number: " + std::to_string(port));
     return _socket.bind(port) == sf::Socket::Status::Done;
 }
 
@@ -217,4 +216,9 @@ bool UDPSocket::confirmed(sf::Uint16 msgId, sf::Uint16 senderId) {
 
 UDPSocket::~UDPSocket() {
     unbind();
+
+}
+
+ unsigned short  UDPSocket::GetLocalPort()  { 
+   return  _socket.getLocalPort();
 }
