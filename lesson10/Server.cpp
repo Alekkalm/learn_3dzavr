@@ -32,7 +32,7 @@ void Server::processConnect(sf::Uint16 senderId) { //senderId - Id нового 
     sf::Packet packetToOldClients;
 
     packetToNewClient << MsgType::Init << senderId; //для нового клиента: отправим ему его же Id который он приобрел
-    packetToNewClient << MsgType::NewClient << senderId; //всем старым клиентам: отправим Id нового клиента
+    packetToOldClients << MsgType::NewClient << senderId; //всем старым клиентам: отправим Id нового клиента
     
     //добавляем нового плеера в коллекцию игроков на сервере. (создаем нового Player-а).
     _players.insert({senderId, std::make_shared<Object>(ObjectNameTag("Player_" + std::to_string(senderId)))});
