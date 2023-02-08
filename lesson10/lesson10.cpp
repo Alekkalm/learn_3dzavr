@@ -135,5 +135,5 @@ int main() {
      */
 
     Lesson10 l;
-    l.create(1280, 720);
+    l.create(300, 200); //l.create(1280, 720);
 }
