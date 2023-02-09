@@ -25,14 +25,24 @@ private:
         //подключить сервер, подключить клиент
         //выбрать ip, выбрать порт, и т.д.
 
+        //если clientIp совпадает с localHost - это значит что мы должны еще и запустить сервер
+        std::string clientIp = "127.0.0.1"; //переменная объекта Client. Указыает на какой ip слать пакеты. (на каком ip находится сервер)
+        sf::Uint16 clientPort = 54000; //переменная объекта Client. Указывает на какой порт слать пакеты.(на каком порту находится сервер)
+        sf::Uint16 serverPort = 54000; //переменная объекта Server. Указывает какой порт должен слушать сервер.
+        //клиент слушает порт, который выдаст ему ОС.
+        //сервер видимо будет слать пакеты на тот порт, с которого пришло подключение. (он этот порт сохранит)
 
-        std::string clientIp = "127.0.0.1"; //если clientIp совпадает с localHost - это значит что мы должны еще и запустить сервер
-        sf::Uint16 clientPort = 54000;
-        sf::Uint16 serverPort = 54000;
+        //можно прочитать свой адрес в локальной сети, и в глобальной сети:
+            // Your address in the local area network (like 192.168.1.100 -- the one you get with ipconfig)
+            //sf::IPAddress Address6 = sf::IPAddress::GetLocalAddress();
+            // Your address in the world wide web (like 83.2.124.68 -- the one you get with www.whatismyip.org)
+            //sf::IPAddress Address7 = sf::IPAddress::GetPublicAddress();
+            //https://www.sfml-dev.org/tutorials/1.6/network-sockets.php
+
 
         if(clientIp == sf::IpAddress::LocalHost){ //если два приложения запустить на одном же комптьютере с   clientIp = "127.0.0.1"
             server->start(serverPort);            //то, т.к. первый сервер уже порт занял, то второй сервер не сможет запуститься.
-        }
+        }   //начинаем слушать порт 54000.
 
         //подписываемся на событие клиента.
         //клиент будет будет дергать событие, и будет выполнятся функция spawnPlayer(id).
@@ -73,8 +83,10 @@ public:
             exit();
         }
 
+        //is_camera_controlling = true;
         if(keyboard->isKeyTapped(sf::Keyboard::C)) { //нажали ли мы на кнопку "С" или нет. Если нажали то перестаем контролировать камеру.
             is_camera_controlling = !is_camera_controlling;
+        //is_camera_controlling = true;
         }
 
         if(is_camera_controlling) { //если камеру нужно контролировать, то мы обновляем ПлейерКонтроллер
