@@ -133,8 +133,8 @@ void UDPSocket::update() { //обновляем все коннекшены
 //если ничего не получил, то MsgType::Empty
 MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
     // Receive message
-    sf::IpAddress ip;
-    sf::Uint16 port;
+    sf::IpAddress ip; //видимо ip от которого пришло сообщение
+    sf::Uint16 port; //видимо port от которого пришло сообщение
 
     packet.clear();
     if (_socket.receive(packet, ip, port) != sf::Socket::Status::Done) {
@@ -148,6 +148,7 @@ MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
     MsgType type;
     senderId = 0;
     if (!(packet >> senderId >> reply >> msgId >> type)) {
+        Log::log("UDPSocket::receive(): can not unpack received packet. packet >> senderId >> reply >> msgId >> type");
         return MsgType::Error;
     }
 
@@ -167,6 +168,8 @@ MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
     if (type == MsgType::Connect) {//подключение нового клиента
         sf::Uint32 version = 0; //версия - это какая версия нашей реализации протокола 
         if (!(packet >> version) || version != Consts::NETWORK_VERSION) { //не удалось получить версию, или если наша версия и версия полученная из пакета не совпадает
+            Log::log("UDPSocket::receive(): Error of MesgConnect from Id " + std::to_string(senderId) + " ip=" + ip.toString() + "port=" + std::to_string(port));
+            Log::log("received msgType::Connect. NETWORK_VERSION Error");
             return MsgType::Error;//просто возвращаем сообщение об ошибке. ни как не интерпретируем и не пытаемся обработать
         }
 
@@ -178,6 +181,8 @@ MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
             if (!_connections.count(tmp)) { //count(k) - возвращает количество элементов с ключем k. Если подключения с таким id нет,
                 senderId = tmp;             //то выбираем это id
             } else if (_connections.at(tmp).same(ip, port)) { //иначе если этот id уже занят, проверяем, не такой же у него ip и port
+                Log::log("UDPSocket::receive(): Error of MesgConnect from Id " + std::to_string(senderId) + " ip=" + ip.toString() + "port=" + std::to_string(port));
+                Log::log("This ip and port registered already! It is duplicated packet.");
                 return MsgType::Error;                        //чтобы небыло несколько подключений с одинаковыми ip и портом.
             }                                                 //т.е. вдруг клиент шлет несколько раз запрос на подключение - добавляем его толко один раз
         }
@@ -190,6 +195,9 @@ MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
     if (!_connections.count(senderId) ||            //что подключение с новым id есть в списке подключений
      !_connections.at(senderId).same(ip, port) ||   //что у подключения с новым id правильныей ip и port
         reply && confirmed(msgId, senderId)) {      //если нужно ответить, отправляем ответ и проверяем "это уже повторное подтверждение?" 
+        Log::log("UDPSocket::receive(): probably duplicate of packet. The message with this MsgId already wall confermed");
+        Log::log("senderId=" + std::to_string(senderId) + " ip=" + ip.toString() + " port=" + std::to_string(port));
+        Log::log("MsgId=" + std::to_string(msgId) + " MsgType=" + MsgType_ToString(type));
         return MsgType::Error;                   //если одно из условий сработало, то возвращаем ошибку.
     }
     return type;
