@@ -21,12 +21,12 @@ bool ClientUDP::isWorking() const {
 }
 
 void ClientUDP::connect(sf::IpAddress ip, sf::Uint16 port) {
-    _ip = ip;
-    _port = port;
+    _ip = ip; //ip сервера на который нужно слать пакеты
+    _port = port; //порт сервера на который нужно слать пакеты
     sf::Packet packet;
     packet << MsgType::Connect << Consts::NETWORK_VERSION;
-    _working = _socket.bind(0);
-    _working ? Log::log("ClientUDP::connect(): Bound to Port 0") :Log::log("ClientUDP::connect(): Bound to port 0 failed")  ;
+    _working = _socket.bind(sf::Socket::AnyPort);//подключаемся к свободному порту для прослушивания. (0 - означает порт который выдас ОС. можно вместо 0 писать AnyPort) 
+    _working ? Log::log("ClientUDP::connect(): Bound to Port " + std::to_string(_socket.GetLocalPort())) :Log::log("ClientUDP::connect(): Bound to port is failed")  ;
     _socket.addConnection(_socket.serverId(), ip, port);
     _socket.sendRely(packet, _socket.serverId());
 
