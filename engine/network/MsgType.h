@@ -25,6 +25,8 @@ enum class MsgType {
     Custom,
 };
 
+const char* MsgType_ToString(MsgType msgType);
+
 sf::Packet &operator<<(sf::Packet &packet, MsgType type);
 
 sf::Packet &operator>>(sf::Packet &packet, MsgType &type);
