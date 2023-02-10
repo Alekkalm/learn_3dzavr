@@ -3,17 +3,35 @@
 //
 
 #include "Server.h"
+#include "../engine/utils/Log.h"
 
 //передаем все где сейчас находятся кубы
 void Server::broadcast() {
     // TODO: implemented (lesson 10)
 
+    double x, y, z, ax, ay, az, aLULx, aLULy, aLULz;
+ 
     sf::Packet updatePacket;
     updatePacket << MsgType::ServerUpdate; //данные с сервера
 
     //в наш пакет broadcast от сервера собирираем координаты всех player-ов
     for(const auto&[playerId, player] : _players){ //словарь: id и объект Player
-        updatePacket << playerId << player->position().x() << player->position().y() << player->position().z();
+
+        x = player->position().x();
+        y = player->position().y();
+        z = player->position().z();
+        ax = player->angle().x();
+        ay = player->angle().y();
+        az = player->angle().z();
+        aLULx = player->angleLeftUpLookAt().x();
+        aLULy = player->angleLeftUpLookAt().y();
+        aLULz = player->angleLeftUpLookAt().z();
+
+        updatePacket << playerId << x << y << z << ax << ay << az << aLULx << aLULy << aLULz;
+
+        Log::log("Server::broadcast(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
+        " ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
+        " aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
     }
 
     //рассылаем пакет всем игрокам
@@ -39,7 +57,7 @@ void Server::processConnect(sf::Uint16 senderId) { //senderId - Id нового 
 
     //используем цикл сразу для двух дел: собираем пакет для нового игрока, и рассылаем пакеты старым игрокам.
     for(const auto&[playerId, player] : _players){
-        //собираем пакент для нового клиента
+        //собираем пакет для нового клиента
         packetToNewClient << playerId << player->position().x() << player->position().y() << player->position().z();
 
         //рассылаем пакеты старым клиентам
@@ -57,10 +75,26 @@ void Server::processConnect(sf::Uint16 senderId) { //senderId - Id нового 
 void Server::processClientUpdate(sf::Uint16 senderId, sf::Packet &packet) {
     // TODO: implemented (lesson 10)
 
-    double x, y, z;
-    packet >> x >> y >> z;
+    double x, y, z, ax, ay, az, aLULx, aLULy, aLULz;
+
+    packet >> x >> y >> z >> ax >> ay >> az >> aLULx >> aLULy >> aLULz;
+
+    Log::log("Server::processClientUpdate(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
+    " ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
+    " aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
 
     _players.at(senderId)->translateToPoint(Vec3D(x, y, z));
+    //_players.at(senderId)->rotate(
+    //Vec3D(  (ax - _players[senderId]->angle().x()),
+    //        (ay - _players[senderId]->angle().y()),
+    //        (az - _players[senderId]->angle().z()))
+    //);
+     _players.at(senderId)->rotateToAngle(Vec3D(ax, ay, az));
+
+    _players[senderId]->rotateLeft(aLULx - _players[senderId]->angleLeftUpLookAt().x());
+    _players[senderId]->rotateUp(aLULy - _players[senderId]->angleLeftUpLookAt().y());
+    _players[senderId]->rotateLookAt(aLULz - _players[senderId]->angleLeftUpLookAt().z());
+    
 }
 
 //что должен делать сервер, когда один из игроков отключается от сервера:

@@ -3,24 +3,46 @@
 //
 
 #include "Client.h"
+#include "../engine/utils/Log.h"
 
 //клиент отправляет серверу свое местоположение
 void Client::updatePacket() {
     // TODO: implemented (lesson 10)
 
     sf::Packet updatePacket;
-    updatePacket << MsgType::ClientUpdate << _player->position().x() << _player->position().y() << _player->position().z();
+    double x, y, z, ax, ay, az, aLULx, aLULy, aLULz;
+    x = _player->position().x();
+    y = _player->position().y();
+    z = _player->position().z();
+    ax = _player->angle().x();
+    ay = _player->angle().y();
+    az = _player->angle().z();
+    aLULx = _player->angleLeftUpLookAt().x();
+    aLULy = _player->angleLeftUpLookAt().y();
+    aLULz = _player->angleLeftUpLookAt().z();
+
+    Log::log("Client::updatePacket(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
+    " ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
+    " aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
+
+    updatePacket << MsgType::ClientUpdate << x << y << z << ax << ay << az << aLULx << aLULy << aLULz;
     _socket.send(updatePacket, _socket.serverId());
+        
 }
 
 //сервер прислал положение всех игроков, нужно добавить их на карту (spawn)
+//это сообщение приходит один раз, при подключении к серверу.
+//сюда присылаются все игроки кроме нас.
 void Client::processInit(sf::Packet &packet) {
     // TODO: implemented (lesson 10)
 
-    sf::Uint16 targetId;
+    sf::Uint16 targetId;//это PlayerId
     double x, y, z;
 
     while (packet >> targetId >> x >> y >> z){ //получаем координаты
+        //Log::log("Client::processInit(): PlayerId=" + std::to_string(targetId) +
+        // " x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) );
+
         if(targetId != _socket.ownId()){ //это вроде лишнее, т.к. мы на сервере не отправляем его, но пока делаю как на видео в уроке.
             if(_spawnPlayerCallBack != nullptr){
                 _spawnPlayerCallBack(targetId); //создаем игрока.. Наконец: это видимо и есть событие. Точнее в нашем случае - просто запускаем на выполнение делегат.
@@ -37,11 +59,25 @@ void Client::processUpdate(sf::Packet &packet) {
     // TODO: implemented (lesson 10)
 
     sf::Uint16 id;
-    double x, y, z;
+    double x, y, z, ax, ay, az, aLULx, aLULy, aLULz;
 
-    while (packet >> id >> x >> y >> z){ //получаем координаты
+    while (packet >> id >> x >> y >> z >> ax >> ay >> az >> aLULx >> aLULy >> aLULz){ //получаем координаты
+    //Log::log("Client::processUpdate(): PlayerId=" + std::to_string(id) +
+    //     " x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
+    //     " ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) +
+    //     " aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
+
          if(_players.count(id)){ //если такой плеер есть,
             _players[id]->translateToPoint(Vec3D(x, y, z));//перемещаем игрока
+            
+            _players[id]->rotateToAngle(Vec3D(ax, ay, az));
+
+            _players[id]->rotateLeft(aLULx - _players[id]->angleLeftUpLookAt().x());
+            _players[id]->rotateUp(aLULy - _players[id]->angleLeftUpLookAt().y());
+            _players[id]->rotateLookAt(aLULz - _players[id]->angleLeftUpLookAt().z());
+            //_players[id]->rotateLeft(rx - _players[id]->angleLeftUpLookAt().x());
+            //_players[id]->rotateUp(ry - _players[id]->angleLeftUpLookAt().y());
+            //_players[id]->rotateLookAt(rz - _players[id]->angleLeftUpLookAt().z());
          }
         
     }
