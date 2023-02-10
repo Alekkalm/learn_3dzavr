@@ -47,13 +47,12 @@ void ClientUDP::update() {
     //мы отправляем пакет серверу
     // Send new client information to server
     if (Time::time() - _lastBroadcast > 1.0 / Consts::NETWORK_WORLD_UPDATE_RATE && connected()) {
-        updatePacket();
+        updatePacket();//отправляем неважные сообщения (текущую позицию)
         _lastBroadcast = Time::time();//последний раз мы отправляли сообщение - сейчас.
     }
 
-    //обновляем сокет..
     // Socket update
-    _socket.update();
+    _socket.update();//отправляем важные сообщения (например: подключиться)
 }
 
 void ClientUDP::disconnect() {
@@ -82,17 +81,20 @@ bool ClientUDP::timeout(sf::Uint16 id) {
 // Returns true, if some message was received.
 bool ClientUDP::process() {
     sf::Packet packet;
-    sf::Uint16 senderId;
-    sf::Uint16 targetId;
+    sf::Uint16 senderId;//сюда возвращается id того кто прислал
+    sf::Uint16 targetId; //это наш Id который нам назначит сервер когда нас подключит. (MsgType::Init)
 
+    //считываем пакет, id отправителя, тип сообщения.
+    //Если это был запрос Connect от клиента, то ему назначается свободный Id, и новый клиент добавляется в наш список игроков.
+    //после считывания пакета, сюда возвращается пакет без первых 4 элементов. (без SenderId, reply, MsgId, MsgType)
     MsgType type = _socket.receive(packet, senderId);
 
     if (type == MsgType::Empty) {
-        return false;
+        return false; //сообщений больше нет
     }
     if (!connected() && type != MsgType::Init) {
-        return true;
-    }
+        return true; //получено сообщение. Говорим что получено сообщение чтобы продолжать читать новые сообщения,
+    }   // но ничего не делаем, т.к. ждем сообщения Init ?
 
     switch (type) {
         // here we process any operations based on msg type
@@ -100,19 +102,20 @@ bool ClientUDP::process() {
             packet >> targetId;         //значит сервер назначил нам id
             _socket.setId(targetId);    //сохраняем его
 
-            Log::log("ClientUDP::process(): client Id = " + std::to_string(targetId) + " connected.");
+            Log::log("ClientUDP::process(): received MsgType::Init. Server send us client Id = " + std::to_string(targetId));
+            Log::log("It means our status = connected");
 
-            processInit(packet);
+            processInit(packet); //без первых 4 элементов. (без SenderId, reply, MsgId, MsgType)
             break;
         case MsgType::ServerUpdate:
 
-            processUpdate(packet);
+            processUpdate(packet); //без первых 4 элементов. (без SenderId, reply, MsgId, MsgType)
             break;
         case MsgType::NewClient://мы получили нового клиента
 
             Log::log("ClientUDP::process(): new client init...");
 
-            processNewClient(packet);
+            processNewClient(packet); //без первых 4 элементов. (без SenderId, reply, MsgId, MsgType)
             break;
         case MsgType::Disconnect://произошел Disconnect
             packet >> targetId; 

@@ -87,7 +87,10 @@ bool ServerUDP::process() {
     sf::Packet sendPacket;
     sf::Uint16 senderId;
 
-    MsgType type = _socket.receive(packet, senderId);//считываем пакет и id отправителя
+    //считываем пакет, id отправителя, тип сообщения.
+    //Если это был запрос Connect от клиента, то ему назначается свободный Id, и новый клиент добавляется в наш список игроков.
+    //после считывания пакета, сюда возвращается пакет без первых 4 элементов. (без SenderId, reply, MsgId, MsgType)
+    MsgType type = _socket.receive(packet, senderId);
 
     if (type == MsgType::Empty) {
         return false;
@@ -99,7 +102,9 @@ bool ServerUDP::process() {
         case MsgType::Connect:  //если произошло соединение
             Log::log("ServerUDP::process(): client Id = " + std::to_string(senderId) + " connecting...");
             //здесь по видео должно быть _clients.insert(senderId); видимо произошли улучнения какие-то
-            processConnect(senderId);
+            //добавим. вроде используется для рассылки Disconnect если произошел TimeOut
+            _clients.insert(senderId);
+            processConnect(senderId);//отсылаем новому клиенту Init, и старым клиентам NewClient
             break;
         case MsgType::ClientUpdate:
 
