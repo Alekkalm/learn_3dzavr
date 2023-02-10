@@ -29,9 +29,10 @@ void Server::broadcast() {
 
         updatePacket << playerId << x << y << z << ax << ay << az << aLULx << aLULy << aLULz;
 
-        Log::log("Server::broadcast(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
-        " ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
-        " aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
+        //закометировал логи чтобы не мешали.
+        //Log::log("Server::broadcast(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
+        //" ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
+        //" aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
     }
 
     //рассылаем пакет всем игрокам
@@ -79,9 +80,10 @@ void Server::processClientUpdate(sf::Uint16 senderId, sf::Packet &packet) {
 
     packet >> x >> y >> z >> ax >> ay >> az >> aLULx >> aLULy >> aLULz;
 
-    Log::log("Server::processClientUpdate(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
-    " ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
-    " aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
+    //закометировал логи чтобы не мешали.
+    //Log::log("Server::processClientUpdate(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
+    //" ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
+    //" aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
 
     _players.at(senderId)->translateToPoint(Vec3D(x, y, z));
     //_players.at(senderId)->rotate(

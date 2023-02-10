@@ -21,9 +21,10 @@ void Client::updatePacket() {
     aLULy = _player->angleLeftUpLookAt().y();
     aLULz = _player->angleLeftUpLookAt().z();
 
-    Log::log("Client::updatePacket(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
-    " ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
-    " aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
+    //закометировал логи чтобы не мешали.
+    //Log::log("Client::updatePacket(): x=" + std::to_string(x) + " y=" + std::to_string(y) + " z=" + std::to_string(z) +
+    //" ax=" + std::to_string(ax) + " ay=" + std::to_string(ay) + " az=" + std::to_string(az) + 
+    //" aLULx=" + std::to_string(aLULx) + " aLULy=" + std::to_string(aLULy) + " aLULz=" + std::to_string(aLULz) );
 
     updatePacket << MsgType::ClientUpdate << x << y << z << ax << ay << az << aLULx << aLULy << aLULz;
     _socket.send(updatePacket, _socket.serverId());
@@ -69,15 +70,12 @@ void Client::processUpdate(sf::Packet &packet) {
 
          if(_players.count(id)){ //если такой плеер есть,
             _players[id]->translateToPoint(Vec3D(x, y, z));//перемещаем игрока
-            
+
             _players[id]->rotateToAngle(Vec3D(ax, ay, az));
 
             _players[id]->rotateLeft(aLULx - _players[id]->angleLeftUpLookAt().x());
             _players[id]->rotateUp(aLULy - _players[id]->angleLeftUpLookAt().y());
             _players[id]->rotateLookAt(aLULz - _players[id]->angleLeftUpLookAt().z());
-            //_players[id]->rotateLeft(rx - _players[id]->angleLeftUpLookAt().x());
-            //_players[id]->rotateUp(ry - _players[id]->angleLeftUpLookAt().y());
-            //_players[id]->rotateLookAt(rz - _players[id]->angleLeftUpLookAt().z());
          }
         
     }
